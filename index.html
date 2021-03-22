@@ -4,7 +4,133 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <title>Project 1</title>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <style>
+      .gridlines line {
+        stroke: lightgray;
+      }
+
+      .gridlines .domain {
+        stroke: none;
+      }
+    </style>
   </head>
-  <body></body>
+  <body>
+      <p id="Viz_1"> Visualization 1: </p>
+
+
+
+
+
+      <p id="Viz_2"> Visualization 2: </p>
+
+
+
+
+
+      <p id="Viz_3"> Visualization 3: </p>
+
+      <svg id="hour" width="800" height="320" style="margin-top:10px; margin-bottom:25px" >
+      </svg>
+
+      <script>
+
+      const svg3 = d3.select("#hour");
+
+      const width3 = svg3.attr("width");
+      const height3 = svg3.attr("height");
+      const margin3 = {left: 40, right: 5, top: 10, bottom: 40};
+
+      const chartWidth3 = width3 - margin3.left - margin3.right;
+      const chartHeight3 = height3 - margin3.top - margin3.bottom;
+
+      let annotations3 = svg3.append("g")
+                             .attr("id","annotations");
+
+      let chart3 = svg3.append("g")
+                       .attr("transform",`translate(${margin3.left},${margin3.top})`)
+
+      d3.csv("gym.csv", d3.autoType).then((data) => {
+
+          data.forEach(d => {
+              if (d.hour === 0) d.hour = 24
+              if (d.hour === 1) d.hour = 25
+              if (d.hour === 2) d.hour = 26
+              if (d.hour === 3) d.hour = 27
+          });
+
+          const hourExtent = d3.extent(data, d => d.hour);
+
+          const hourScale = d3.scaleLinear()
+                              .domain(hourExtent)
+                              .range([10, chartWidth3 - 10]);
+
+          const peopleExtent = d3.extent(data, d => d.number_people);
+          const peopleScale = d3.scaleLinear()
+                                .domain([0, 50])
+                                .range([chartHeight3, 0]);
+
+          let yAxis3 = d3.axisLeft(peopleScale)
+                         .ticks(14);
+          let yGridlines3 = d3.axisLeft(peopleScale)
+                             .tickSize(-chartWidth3-5)
+                             .ticks(14)
+                             .tickFormat("");
+
+          annotations3.append("g")
+            .attr("transform",`translate(${margin3.left - 5},${margin3.top})`)
+            .call(yAxis3)
+
+          annotations3.append("g")
+            .attr("class", "gridlines")
+            .attr("transform",`translate(${margin3.left - 5},${margin3.top})`)
+            .call(yGridlines3);
+
+          let xAxis3 = d3.axisBottom(hourScale)
+                         .ticks(23)
+                         .tickFormat(d => {
+                             if (d >= 4 && d < 12) {
+                                 return d + "AM";
+                             } else if (d >= 12 && d < 24) {
+                                 return (d == 12 ? d : d - 12) + "PM";
+                             } else {
+                                 return (d == 24 ? d - 12 : d - 24) + "AM";
+                             }
+                         });
+          annotations3.append("g")
+            .attr("transform",`translate(${margin3.left},${chartHeight3 + margin3.top})`)
+            .call(xAxis3);
+
+
+            svg3.append("line")
+                .attr("x1", margin3.left - 5)
+                .attr("x2", margin3.left + 10)
+                .attr("y1", chartHeight3 + margin3.top)
+                .attr("y2", chartHeight3 + margin3.top)
+                .style("stroke", "black")
+                .style("stroke-width", "1");
+
+            svg3.append("line")
+                .attr("x1", margin3.left + chartWidth3 - 10)
+                .attr("x2", margin3.left + chartWidth3 + 5)
+                .attr("y1", chartHeight3 + margin3.top)
+                .attr("y2", chartHeight3 + margin3.top)
+                .style("stroke", "black")
+                .style("stroke-width", "1");
+
+
+          for (let h = 4; h <= hourExtent[1]; h++) {
+            chart3.append("line")
+                 .attr("x1", hourScale(h))
+                 .attr("x2", hourScale(h))
+                 .attr("y1", chartHeight3 - 0.5)
+                 .attr("y2", peopleScale(d3.mean(data, d => d.hour === h ? d.number_people : NaN)))
+                 .style("stroke", "#5555F0")
+                 .style("stroke-width", 22);
+          }
+      });
+      </script>
+
+  </body>
 </html>
