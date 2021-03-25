@@ -160,7 +160,6 @@
         });
 
         const hourExtent = d3.extent(data, (d) => d.hour);
-
         const hourScale = d3
           .scaleLinear()
           .domain(hourExtent)
@@ -243,6 +242,101 @@
             .style("stroke", "#5555F0")
             .style("stroke-width", 22);
         }
+      });
+    </script>
+
+    <p id="Viz_1">Visualization 4:</p>
+    <svg
+      id="temp"
+      width="800"
+      height="320"
+      style="margin-top: 10px; margin-bottom: 25px"
+    ></svg>
+
+    <script>
+      const svg4 = d3.select("#temp");
+
+      const width4 = svg4.attr("width");
+      const height4 = svg4.attr("height");
+      const margin4 = { left: 40, right: 5, top: 10, bottom: 40 };
+
+      const chartWidth4 = width4 - margin4.left - margin4.right;
+      const chartHeight4 = height4 - margin4.top - margin4.bottom;
+
+      let annotations4 = svg4.append("g").attr("id", "annotations");
+
+      let scatter4 = svg4
+        .append("g")
+        .attr("transform", `translate(${margin4.left},${margin4.top})`);
+
+      d3.csv("gym.csv", d3.autoType).then((data) => {
+        const tempExtent = d3.extent(data, (d) => d.temperature);
+        const tempScale = d3
+          .scaleLinear()
+          .domain(tempExtent)
+          .range([10, chartWidth4 - 10]);
+
+        const peopleExtent = d3.extent(data, (d) => d.number_people);
+        const peopleScale = d3
+          .scaleLinear()
+          .domain([0, 50])
+          .range([chartHeight4, 0]);
+
+        let yAxis4 = d3.axisLeft(peopleScale).ticks(14);
+        let yGridlines4 = d3
+          .axisLeft(peopleScale)
+          .tickSize(-chartWidth4 - 5)
+          .ticks(14)
+          .tickFormat("");
+
+        annotations4
+          .append("g")
+          .attr("transform", `translate(${margin4.left - 5},${margin4.top})`)
+          .call(yAxis4);
+        annotations4
+          .append("g")
+          .attr("class", "gridlines")
+          .attr("transform", `translate(${margin4.left - 5},${margin4.top})`)
+          .call(yGridlines4);
+
+        let xAxis4 = d3.axisBottom(tempScale).ticks(12);
+
+        annotations4
+          .append("g")
+          .attr(
+            "transform",
+            `translate(${margin4.left},${chartHeight4 + margin4.top})`
+          )
+          .call(xAxis4);
+
+        svg4
+          .append("line")
+          .attr("x1", margin4.left - 5)
+          .attr("x2", margin4.left + 10)
+          .attr("y1", chartHeight4 + margin4.top)
+          .attr("y2", chartHeight4 + margin4.top)
+          .style("stroke", "black")
+          .style("stroke-width", "1");
+
+        svg4
+          .append("line")
+          .attr("x1", margin4.left + chartWidth4 - 10)
+          .attr("x2", margin4.left + chartWidth4 + 5)
+          .attr("y1", chartHeight4 + margin4.top)
+          .attr("y2", chartHeight4 + margin4.top)
+          .style("stroke", "black")
+          .style("stroke-width", "1");
+
+        // plot bars
+        scatter4
+          .selectAll("circle")
+          .data(data)
+          .join("circle")
+          .attr("r", 3)
+          .attr("fill", "darkblue")
+          .attr("opacity", 0.3)
+          .attr("cx", (d) => tempScale(d.temperature))
+          .attr("cy", (d) => peopleScale(d.number_people));
       });
     </script>
   </body>
