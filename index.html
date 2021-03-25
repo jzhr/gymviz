@@ -17,120 +17,233 @@
     </style>
   </head>
   <body>
-      <p id="Viz_1"> Visualization 1: </p>
+    <p id="Viz_1">Visualization 1:</p>
+    <svg
+      id="month"
+      width="800"
+      height="320"
+      style="margin-top: 10px; margin-bottom: 25px"
+    ></svg>
 
+    <script>
+      const svg1 = d3.select("#month");
 
+      const width1 = svg1.attr("width");
+      const height1 = svg1.attr("height");
+      const margin1 = { left: 40, right: 5, top: 10, bottom: 40 };
 
+      const chartWidth1 = width1 - margin1.left - margin1.right;
+      const chartHeight1 = height1 - margin1.top - margin1.bottom;
 
+      let annotations1 = svg1.append("g").attr("id", "annotations");
 
-      <p id="Viz_2"> Visualization 2: </p>
+      let chart1 = svg1
+        .append("g")
+        .attr("transform", `translate(${margin1.left},${margin1.top})`);
 
+      d3.csv("gym.csv", d3.autoType).then((data) => {
+        const monthScale = d3
+          .scaleLinear()
+          .domain([1, 12])
+          .range([10, chartWidth3 - 10]);
 
+        const peopleExtent = d3.extent(data, (d) => d.number_people);
+        const peopleScale = d3
+          .scaleLinear()
+          .domain([0, 50])
+          .range([chartHeight3, 0]);
 
+        let yAxis1 = d3.axisLeft(peopleScale).ticks(14);
+        let yGridlines1 = d3
+          .axisLeft(peopleScale)
+          .tickSize(-chartWidth3 - 5)
+          .ticks(14)
+          .tickFormat("");
 
+        annotations1
+          .append("g")
+          .attr("transform", `translate(${margin3.left - 5},${margin3.top})`)
+          .call(yAxis1);
+        annotations1
+          .append("g")
+          .attr("class", "gridlines")
+          .attr("transform", `translate(${margin3.left - 5},${margin3.top})`)
+          .call(yGridlines1);
 
-      <p id="Viz_3"> Visualization 3: </p>
+        let xAxis1 = d3.axisBottom(monthScale).ticks(12);
 
-      <svg id="hour" width="800" height="320" style="margin-top:10px; margin-bottom:25px" >
-      </svg>
+        annotations1
+          .append("g")
+          .attr(
+            "transform",
+            `translate(${margin3.left},${chartHeight3 + margin3.top})`
+          )
+          .call(xAxis1);
 
-      <script>
+        svg1
+          .append("line")
+          .attr("x1", margin1.left - 5)
+          .attr("x2", margin1.left + 10)
+          .attr("y1", chartHeight1 + margin1.top)
+          .attr("y2", chartHeight1 + margin1.top)
+          .style("stroke", "black")
+          .style("stroke-width", "1");
 
+        svg1
+          .append("line")
+          .attr("x1", margin1.left + chartWidth1 - 10)
+          .attr("x2", margin1.left + chartWidth1 + 5)
+          .attr("y1", chartHeight1 + margin3.top)
+          .attr("y2", chartHeight1 + margin3.top)
+          .style("stroke", "black")
+          .style("stroke-width", "1");
+
+        // plot bars
+        // function colorSemesters(m) {
+        //   if (m < 6 || m > 8) {
+        //     return "#5555F0";
+        //   } else {
+        //     return "#ff6961";
+        //   }
+        // }
+
+        for (let m = 1; m <= 12; m++) {
+          chart1
+            .append("line")
+            .attr("x1", monthScale(m))
+            .attr("x2", monthScale(m))
+            .attr("y1", chartHeight1 - 0.5)
+            .attr(
+              "y2",
+              peopleScale(
+                d3.mean(data, (d) => (d.month === m ? d.number_people : NaN))
+              )
+            )
+            .style("stroke", "#5555F0")
+            .style("stroke-width", 22);
+        }
+      });
+    </script>
+
+    <p id="Viz_2">Visualization 2:</p>
+
+    <p id="Viz_3">Visualization 3:</p>
+    <svg
+      id="hour"
+      width="800"
+      height="320"
+      style="margin-top: 10px; margin-bottom: 25px"
+    ></svg>
+
+    <script>
       const svg3 = d3.select("#hour");
 
       const width3 = svg3.attr("width");
       const height3 = svg3.attr("height");
-      const margin3 = {left: 40, right: 5, top: 10, bottom: 40};
+      const margin3 = { left: 40, right: 5, top: 10, bottom: 40 };
 
       const chartWidth3 = width3 - margin3.left - margin3.right;
       const chartHeight3 = height3 - margin3.top - margin3.bottom;
 
-      let annotations3 = svg3.append("g")
-                             .attr("id","annotations");
+      let annotations3 = svg3.append("g").attr("id", "annotations");
 
-      let chart3 = svg3.append("g")
-                       .attr("transform",`translate(${margin3.left},${margin3.top})`)
+      let chart3 = svg3
+        .append("g")
+        .attr("transform", `translate(${margin3.left},${margin3.top})`);
 
       d3.csv("gym.csv", d3.autoType).then((data) => {
+        data.forEach((d) => {
+          if (d.hour === 0) d.hour = 24;
+          if (d.hour === 1) d.hour = 25;
+          if (d.hour === 2) d.hour = 26;
+          if (d.hour === 3) d.hour = 27;
+        });
 
-          data.forEach(d => {
-              if (d.hour === 0) d.hour = 24
-              if (d.hour === 1) d.hour = 25
-              if (d.hour === 2) d.hour = 26
-              if (d.hour === 3) d.hour = 27
+        const hourExtent = d3.extent(data, (d) => d.hour);
+
+        const hourScale = d3
+          .scaleLinear()
+          .domain(hourExtent)
+          .range([10, chartWidth3 - 10]);
+
+        const peopleExtent = d3.extent(data, (d) => d.number_people);
+        const peopleScale = d3
+          .scaleLinear()
+          .domain([0, 50])
+          .range([chartHeight3, 0]);
+
+        let yAxis3 = d3.axisLeft(peopleScale).ticks(14);
+        let yGridlines3 = d3
+          .axisLeft(peopleScale)
+          .tickSize(-chartWidth3 - 5)
+          .ticks(14)
+          .tickFormat("");
+
+        annotations3
+          .append("g")
+          .attr("transform", `translate(${margin3.left - 5},${margin3.top})`)
+          .call(yAxis3);
+
+        annotations3
+          .append("g")
+          .attr("class", "gridlines")
+          .attr("transform", `translate(${margin3.left - 5},${margin3.top})`)
+          .call(yGridlines3);
+
+        let xAxis3 = d3
+          .axisBottom(hourScale)
+          .ticks(23)
+          .tickFormat((d) => {
+            if (d >= 4 && d < 12) {
+              return d + "AM";
+            } else if (d >= 12 && d < 24) {
+              return (d == 12 ? d : d - 12) + "PM";
+            } else {
+              return (d == 24 ? d - 12 : d - 24) + "AM";
+            }
           });
+        annotations3
+          .append("g")
+          .attr(
+            "transform",
+            `translate(${margin3.left},${chartHeight3 + margin3.top})`
+          )
+          .call(xAxis3);
 
-          const hourExtent = d3.extent(data, d => d.hour);
+        svg3
+          .append("line")
+          .attr("x1", margin3.left - 5)
+          .attr("x2", margin3.left + 10)
+          .attr("y1", chartHeight3 + margin3.top)
+          .attr("y2", chartHeight3 + margin3.top)
+          .style("stroke", "black")
+          .style("stroke-width", "1");
 
-          const hourScale = d3.scaleLinear()
-                              .domain(hourExtent)
-                              .range([10, chartWidth3 - 10]);
+        svg3
+          .append("line")
+          .attr("x1", margin3.left + chartWidth3 - 10)
+          .attr("x2", margin3.left + chartWidth3 + 5)
+          .attr("y1", chartHeight3 + margin3.top)
+          .attr("y2", chartHeight3 + margin3.top)
+          .style("stroke", "black")
+          .style("stroke-width", "1");
 
-          const peopleExtent = d3.extent(data, d => d.number_people);
-          const peopleScale = d3.scaleLinear()
-                                .domain([0, 50])
-                                .range([chartHeight3, 0]);
-
-          let yAxis3 = d3.axisLeft(peopleScale)
-                         .ticks(14);
-          let yGridlines3 = d3.axisLeft(peopleScale)
-                             .tickSize(-chartWidth3-5)
-                             .ticks(14)
-                             .tickFormat("");
-
-          annotations3.append("g")
-            .attr("transform",`translate(${margin3.left - 5},${margin3.top})`)
-            .call(yAxis3)
-
-          annotations3.append("g")
-            .attr("class", "gridlines")
-            .attr("transform",`translate(${margin3.left - 5},${margin3.top})`)
-            .call(yGridlines3);
-
-          let xAxis3 = d3.axisBottom(hourScale)
-                         .ticks(23)
-                         .tickFormat(d => {
-                             if (d >= 4 && d < 12) {
-                                 return d + "AM";
-                             } else if (d >= 12 && d < 24) {
-                                 return (d == 12 ? d : d - 12) + "PM";
-                             } else {
-                                 return (d == 24 ? d - 12 : d - 24) + "AM";
-                             }
-                         });
-          annotations3.append("g")
-            .attr("transform",`translate(${margin3.left},${chartHeight3 + margin3.top})`)
-            .call(xAxis3);
-
-
-            svg3.append("line")
-                .attr("x1", margin3.left - 5)
-                .attr("x2", margin3.left + 10)
-                .attr("y1", chartHeight3 + margin3.top)
-                .attr("y2", chartHeight3 + margin3.top)
-                .style("stroke", "black")
-                .style("stroke-width", "1");
-
-            svg3.append("line")
-                .attr("x1", margin3.left + chartWidth3 - 10)
-                .attr("x2", margin3.left + chartWidth3 + 5)
-                .attr("y1", chartHeight3 + margin3.top)
-                .attr("y2", chartHeight3 + margin3.top)
-                .style("stroke", "black")
-                .style("stroke-width", "1");
-
-
-          for (let h = 4; h <= hourExtent[1]; h++) {
-            chart3.append("line")
-                 .attr("x1", hourScale(h))
-                 .attr("x2", hourScale(h))
-                 .attr("y1", chartHeight3 - 0.5)
-                 .attr("y2", peopleScale(d3.mean(data, d => d.hour === h ? d.number_people : NaN)))
-                 .style("stroke", "#5555F0")
-                 .style("stroke-width", 22);
-          }
+        for (let h = 4; h <= hourExtent[1]; h++) {
+          chart3
+            .append("line")
+            .attr("x1", hourScale(h))
+            .attr("x2", hourScale(h))
+            .attr("y1", chartHeight3 - 0.5)
+            .attr(
+              "y2",
+              peopleScale(
+                d3.mean(data, (d) => (d.hour === h ? d.number_people : NaN))
+              )
+            )
+            .style("stroke", "#5555F0")
+            .style("stroke-width", 22);
+        }
       });
-      </script>
-
+    </script>
   </body>
 </html>
