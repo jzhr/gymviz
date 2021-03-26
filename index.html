@@ -171,6 +171,7 @@
           )
           .call(xAxis1);
 
+        // axis labels
         svg1
           .append("text")
           .attr("class", "x label")
@@ -178,7 +179,6 @@
           .attr("x", chartWidth1 / 2 + 20)
           .attr("y", chartHeight1 + 45)
           .text("Months Sorted by Ascending Average Temperature");
-
         svg1
           .append("text")
           .attr("class", "y label")
@@ -422,7 +422,7 @@
           .attr("y", 16)
           .attr("dy", ".45em")
           .attr("transform", "rotate(-90)")
-          .text("Number of People");
+          .text("Average Number of People");
 
         let niceDataArray = [];
         for (let day = 0; day < 7; day++) {
