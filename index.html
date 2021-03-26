@@ -29,7 +29,185 @@
     </style>
   </head>
   <body>
-    <p id="Viz_1">Visualization 1:</p>
+    <p id="Viz_3">Visualization 1:</p>
+    <svg
+      id="hour"
+      width="800"
+      height="350"
+      style="margin-top: 10px; margin-bottom: 0px"
+    ></svg>
+
+    <div
+      id="dayLegend"
+      class="legend"
+      style="margin-top: 0; padding: 5px; border: solid black 1px; width: 724px"
+    ></div>
+    <script>
+      const svg3 = d3.select("#hour");
+
+      const width3 = svg3.attr("width");
+      const height3 = svg3.attr("height");
+      const margin3 = { left: 55, right: 5, top: 10, bottom: 40 };
+
+      const chartWidth3 = width3 - margin3.left - margin3.right;
+      const chartHeight3 = height3 - margin3.top - margin3.bottom;
+
+      let annotations3 = svg3.append("g").attr("id", "annotations");
+
+      let chart3 = svg3
+        .append("g")
+        .attr("transform", `translate(${margin3.left},${margin3.top})`);
+
+      d3.csv("gym.csv", d3.autoType).then((data) => {
+        const hourExtent = d3.extent(data, (d) => d.hour);
+
+        const hourScale = d3
+          .scaleLinear()
+          .domain(hourExtent)
+          .range([10, chartWidth3 - 10]);
+
+        const peopleExtent = d3.extent(data, (d) => d.number_people);
+        const peopleScale = d3
+          .scaleLinear()
+          .domain([0, 55])
+          .range([chartHeight3, 0]);
+
+        const dayScale = d3.scaleOrdinal(d3.schemeTableau10); //TODO: Change this?
+
+        let yAxis3 = d3.axisLeft(peopleScale).ticks(14);
+        let yGridlines3 = d3
+          .axisLeft(peopleScale)
+          .tickSize(-chartWidth3)
+          .ticks(14)
+          .tickFormat("");
+
+        annotations3
+          .append("g")
+          .attr("transform", `translate(${margin3.left},${margin3.top})`)
+          .call(yAxis3);
+
+        annotations3
+          .append("g")
+          .attr("class", "gridlines")
+          .attr("transform", `translate(${margin3.left},${margin3.top})`)
+          .call(yGridlines3);
+
+        let xAxis3 = d3
+          .axisBottom(hourScale)
+          .ticks(23)
+          .tickFormat((d) => {
+            if (d < 12) {
+              return (d === 0 ? d + 12 : d) + "AM";
+            } else {
+              return (d === 12 ? d : d - 12) + "PM";
+            }
+          });
+
+        let xGridlines3 = d3
+          .axisBottom(hourScale)
+          .tickSize(-chartHeight3 - 5)
+          .ticks(23)
+          .tickFormat("");
+
+        annotations3
+          .append("g")
+          .attr(
+            "transform",
+            `translate(${margin3.left},${chartHeight3 + margin3.top})`
+          )
+          .call(xAxis3);
+
+        annotations3
+          .append("g")
+          .attr("class", "gridlines")
+          .attr(
+            "transform",
+            `translate(${margin3.left},${chartHeight3 + margin3.top})`
+          )
+          .call(xGridlines3);
+
+        svg3
+          .append("text")
+          .attr("class", "x label")
+          .attr("text-anchor", "middle")
+          .attr("x", chartWidth3 / 2 + 20)
+          .attr("y", chartHeight3 + 45)
+          .text("Hour of Day");
+
+        svg3
+          .append("text")
+          .attr("class", "y label")
+          .attr("text-anchor", "end")
+          .attr("x", -76)
+          .attr("y", 16)
+          .attr("dy", ".45em")
+          .attr("transform", "rotate(-90)")
+          .text("Average Number of People");
+
+        let niceDataArray = [];
+        for (let day = 0; day < 7; day++) {
+          // 0 = Monday, 6 = Sunday
+          let niceData = [];
+          for (let h = 0; h < 24; h++) {
+            let average = d3.mean(data, (d) =>
+              d.hour === h && d.day_of_week === day ? d.number_people : NaN
+            );
+            niceData.push({
+              day: day,
+              hour: h,
+              hour_average: average,
+            });
+
+            // Append the circles for the chart now, while we have access to all the needed data
+            chart3
+              .append("circle")
+              .attr("r", 3)
+              .attr("fill", dayScale(day))
+              .attr("cx", hourScale(h))
+              .attr("cy", peopleScale(average));
+          }
+          niceDataArray[day] = niceData;
+        }
+        // console.log(niceDataArray);
+
+        var lineGen = d3
+          .line()
+          .x((d) => hourScale(d.hour))
+          .y((d) => peopleScale(d.hour_average))
+          .curve(d3.curveMonotoneX);
+
+        for (let day = 0; day < 7; day++) {
+          // 0 = Monday, 6 = Sunday
+          chart3
+            .append("path")
+            .datum(niceDataArray[day])
+            .attr("class", "line")
+            .attr("fill", "none")
+            .attr("stroke", dayScale(day))
+            .attr("stroke-width", 2)
+            .attr("d", lineGen);
+        }
+
+        dayScale.domain().forEach(function (d, i) {
+          d3.select("#dayLegend")
+            .append("span")
+            .text(dayconverter(d))
+            .style("color", dayScale(d));
+        });
+
+        function dayconverter(x) {
+          if (x == 0) return "Monday";
+          if (x == 1) return "Tuesday";
+          if (x == 2) return "Wednesday";
+          if (x == 3) return "Thursday";
+          if (x == 4) return "Friday";
+          if (x == 5) return "Saturday";
+          if (x == 6) return "Sunday";
+        }
+      });
+    </script>
+
+    <p id="Viz_1">Visualization 2:</p>
     <svg
       id="month"
       width="800"
@@ -204,285 +382,6 @@
             )
             .style("stroke", d3.interpolateTurbo(m / 12))
             .style("stroke-width", 22);
-        }
-      });
-    </script>
-
-    <p id="Viz_2">Visualization 2:</p>
-
-    <svg
-      id="day"
-      width="800"
-      height="320"
-      style="margin-top: 10px; margin-bottom: 25px"
-    ></svg>
-
-    <script>
-      const svg2 = d3.select("#day");
-
-      const width2 = svg1.attr("width");
-      const height2 = svg1.attr("height");
-      const margin2 = { left: 40, right: 5, top: 10, bottom: 40 };
-
-      const chartWidth2 = width1 - margin2.left - margin2.right;
-      const chartHeight2 = height1 - margin2.top - margin2.bottom;
-
-      let annotations2 = svg2.append("g").attr("id", "annotations");
-
-      let chart2 = svg2
-        .append("g")
-        .attr("transform", `translate(${margin2.left},${margin2.top})`);
-
-      d3.csv("gym.csv", d3.autoType).then((data) => {
-        const dayScale = d3
-          .scaleLinear()
-          .domain([0, 6])
-          .range([10, chartWidth2 - 10]);
-
-        const peopleExtent2 = d3.extent(data, (d) => d.number_people);
-        const peopleScale2 = d3
-          .scaleLinear()
-          .domain([0, 50])
-          .range([chartHeight2, 0]);
-
-        let yAxis2 = d3.axisLeft(peopleScale2).ticks(14);
-        let yGridlines2 = d3
-          .axisLeft(peopleScale2)
-          .tickSize(-chartWidth2 - 5)
-          .ticks(14)
-          .tickFormat("");
-
-        annotations2
-          .append("g")
-          .attr("transform", `translate(${margin2.left - 5},${margin2.top})`)
-          .call(yAxis2);
-        annotations2
-          .append("g")
-          .attr("class", "gridlines")
-          .attr("transform", `translate(${margin2.left - 5},${margin2.top})`)
-          .call(yGridlines2);
-
-        let xAxis2 = d3.axisBottom(dayScale).ticks(7);
-
-        annotations2
-          .append("g")
-          .attr(
-            "transform",
-            `translate(${margin3.left},${chartHeight2 + margin3.top})`
-          )
-          .call(xAxis2);
-
-        svg2
-          .append("line")
-          .attr("x1", margin2.left - 5)
-          .attr("x2", margin2.left + 10)
-          .attr("y1", chartHeight2 + margin2.top)
-          .attr("y2", chartHeight2 + margin2.top)
-          .style("stroke", "black")
-          .style("stroke-width", "1");
-
-        svg2
-          .append("line")
-          .attr("x1", margin2.left + chartWidth2 - 10)
-          .attr("x2", margin2.left + chartWidth2 + 5)
-          .attr("y1", chartHeight2 + margin2.top)
-          .attr("y2", chartHeight2 + margin2.top)
-          .style("stroke", "black")
-          .style("stroke-width", "1");
-
-        for (let m = 0; m <= 6; m++) {
-          chart2
-            .append("line")
-            .attr("x1", dayScale(m))
-            .attr("x2", dayScale(m))
-            .attr("y1", chartHeight2 - 0.5)
-            .attr(
-              "y2",
-              peopleScale2(
-                d3.mean(data, (d) =>
-                  d.day_of_week === m ? d.number_people : NaN
-                )
-              )
-            )
-            .style("stroke", "#5555F0")
-            .style("stroke-width", 22);
-        }
-      });
-    </script>
-    <p id="Viz_3">Visualization 3:</p>
-    <svg
-      id="hour"
-      width="800"
-      height="350"
-      style="margin-top: 10px; margin-bottom: 0px"
-    ></svg>
-
-    <div
-      id="dayLegend"
-      class="legend"
-      style="margin-top: 0; padding: 5px; border: solid black 1px; width: 724px"
-    ></div>
-    <script>
-      const svg3 = d3.select("#hour");
-
-      const width3 = svg3.attr("width");
-      const height3 = svg3.attr("height");
-      const margin3 = { left: 55, right: 5, top: 10, bottom: 40 };
-
-      const chartWidth3 = width3 - margin3.left - margin3.right;
-      const chartHeight3 = height3 - margin3.top - margin3.bottom;
-
-      let annotations3 = svg3.append("g").attr("id", "annotations");
-
-      let chart3 = svg3
-        .append("g")
-        .attr("transform", `translate(${margin3.left},${margin3.top})`);
-
-      d3.csv("gym.csv", d3.autoType).then((data) => {
-        const hourExtent = d3.extent(data, (d) => d.hour);
-
-        const hourScale = d3
-          .scaleLinear()
-          .domain(hourExtent)
-          .range([10, chartWidth3 - 10]);
-
-        const peopleExtent = d3.extent(data, (d) => d.number_people);
-        const peopleScale = d3
-          .scaleLinear()
-          .domain([0, 55])
-          .range([chartHeight3, 0]);
-
-        const dayScale = d3.scaleOrdinal(d3.schemeTableau10); //TODO: Change this?
-
-        let yAxis3 = d3.axisLeft(peopleScale).ticks(14);
-        let yGridlines3 = d3
-          .axisLeft(peopleScale)
-          .tickSize(-chartWidth3)
-          .ticks(14)
-          .tickFormat("");
-
-        annotations3
-          .append("g")
-          .attr("transform", `translate(${margin3.left},${margin3.top})`)
-          .call(yAxis3);
-
-        annotations3
-          .append("g")
-          .attr("class", "gridlines")
-          .attr("transform", `translate(${margin3.left},${margin3.top})`)
-          .call(yGridlines3);
-
-        let xAxis3 = d3
-          .axisBottom(hourScale)
-          .ticks(23)
-          .tickFormat((d) => {
-            if (d < 12) {
-              return (d === 0 ? d + 12 : d) + "AM";
-            } else {
-              return (d === 12 ? d : d - 12) + "PM";
-            }
-          });
-
-        let xGridlines3 = d3
-          .axisBottom(hourScale)
-          .tickSize(-chartHeight3 - 5)
-          .ticks(23)
-          .tickFormat("");
-
-        annotations3
-          .append("g")
-          .attr(
-            "transform",
-            `translate(${margin3.left},${chartHeight3 + margin3.top})`
-          )
-          .call(xAxis3);
-
-        annotations3
-          .append("g")
-          .attr("class", "gridlines")
-          .attr(
-            "transform",
-            `translate(${margin3.left},${chartHeight3 + margin3.top})`
-          )
-          .call(xGridlines3);
-
-        svg3
-          .append("text")
-          .attr("class", "x label")
-          .attr("text-anchor", "middle")
-          .attr("x", chartWidth3 / 2 + 20)
-          .attr("y", chartHeight3 + 45)
-          .text("Hour of Day");
-
-        svg3
-          .append("text")
-          .attr("class", "y label")
-          .attr("text-anchor", "end")
-          .attr("x", -76)
-          .attr("y", 16)
-          .attr("dy", ".45em")
-          .attr("transform", "rotate(-90)")
-          .text("Average Number of People");
-
-        let niceDataArray = [];
-        for (let day = 0; day < 7; day++) {
-          // 0 = Monday, 6 = Sunday
-          let niceData = [];
-          for (let h = 0; h < 24; h++) {
-            let average = d3.mean(data, (d) =>
-              d.hour === h && d.day_of_week === day ? d.number_people : NaN
-            );
-            niceData.push({
-              day: day,
-              hour: h,
-              hour_average: average,
-            });
-
-            // Append the circles for the chart now, while we have access to all the needed data
-            chart3
-              .append("circle")
-              .attr("r", 3)
-              .attr("fill", dayScale(day))
-              .attr("cx", hourScale(h))
-              .attr("cy", peopleScale(average));
-          }
-          niceDataArray[day] = niceData;
-        }
-        // console.log(niceDataArray);
-
-        var lineGen = d3
-          .line()
-          .x((d) => hourScale(d.hour))
-          .y((d) => peopleScale(d.hour_average))
-          .curve(d3.curveMonotoneX);
-
-        for (let day = 0; day < 7; day++) {
-          // 0 = Monday, 6 = Sunday
-          chart3
-            .append("path")
-            .datum(niceDataArray[day])
-            .attr("class", "line")
-            .attr("fill", "none")
-            .attr("stroke", dayScale(day))
-            .attr("stroke-width", 2)
-            .attr("d", lineGen);
-        }
-
-        dayScale.domain().forEach(function (d, i) {
-          d3.select("#dayLegend")
-            .append("span")
-            .text(dayconverter(d))
-            .style("color", dayScale(d));
-        });
-
-        function dayconverter(x) {
-          if (x == 0) return "Monday";
-          if (x == 1) return "Tuesday";
-          if (x == 2) return "Wednesday";
-          if (x == 3) return "Thursday";
-          if (x == 4) return "Friday";
-          if (x == 5) return "Saturday";
-          if (x == 6) return "Sunday";
         }
       });
     </script>
