@@ -14,6 +14,15 @@
       .gridlines .domain {
         stroke: none;
       }
+
+      .legend span {
+        margin-right: 10px;
+      }
+
+      .legend {
+        display: block;
+        margin-left: 50px
+      }
     </style>
   </head>
   <body>
@@ -127,6 +136,100 @@
 
     <p id="Viz_2">Visualization 2:</p>
 
+    <svg id="day" width="800" height="320" style="margin-top: 10px; margin-bottom: 25px"
+    ></svg>
+
+    <script>
+    const svg2 = d3.select("#day");
+
+    const width2 = svg1.attr("width");
+    const height2 = svg1.attr("height");
+    const margin2 = { left: 40, right: 5, top: 10, bottom: 40 };
+
+    const chartWidth2 = width1 - margin2.left - margin2.right;
+    const chartHeight2 = height1 - margin2.top - margin2.bottom;
+
+    let annotations2 = svg2.append("g").attr("id", "annotations");
+
+    let chart2 = svg2
+      .append("g")
+      .attr("transform", `translate(${margin2.left},${margin2.top})`);
+
+    d3.csv("gym.csv", d3.autoType).then((data) => {
+      const dayScale = d3
+        .scaleLinear()
+        .domain([0, 6])
+        .range([10, chartWidth2 - 10]);
+
+      const peopleExtent2 = d3.extent(data, (d) => d.number_people);
+      const peopleScale2 = d3
+        .scaleLinear()
+        .domain([0, 50])
+        .range([chartHeight2, 0]);
+
+      let yAxis2 = d3.axisLeft(peopleScale2).ticks(14);
+      let yGridlines2 = d3
+        .axisLeft(peopleScale2)
+        .tickSize(-chartWidth2 - 5)
+        .ticks(14)
+        .tickFormat("");
+
+      annotations2
+        .append("g")
+        .attr("transform", `translate(${margin2.left - 5},${margin2.top})`)
+        .call(yAxis2);
+      annotations2
+        .append("g")
+        .attr("class", "gridlines")
+        .attr("transform", `translate(${margin2.left - 5},${margin2.top})`)
+        .call(yGridlines2);
+
+      let xAxis2 = d3.axisBottom(dayScale).ticks(7);
+
+      annotations2
+        .append("g")
+        .attr(
+          "transform",
+          `translate(${margin3.left},${chartHeight2 + margin3.top})`
+        )
+        .call(xAxis2);
+
+      svg2
+        .append("line")
+        .attr("x1", margin2.left - 5)
+        .attr("x2", margin2.left + 10)
+        .attr("y1", chartHeight2 + margin2.top)
+        .attr("y2", chartHeight2 + margin2.top)
+        .style("stroke", "black")
+        .style("stroke-width", "1");
+
+      svg2
+        .append("line")
+        .attr("x1", margin2.left + chartWidth2 - 10)
+        .attr("x2", margin2.left + chartWidth2 + 5)
+        .attr("y1", chartHeight2 + margin2.top)
+        .attr("y2", chartHeight2 + margin2.top)
+        .style("stroke", "black")
+        .style("stroke-width", "1");
+
+
+      for (let m = 0; m <= 6; m++) {
+        chart2
+          .append("line")
+          .attr("x1", dayScale(m))
+          .attr("x2", dayScale(m))
+          .attr("y1", chartHeight2 - 0.5)
+          .attr(
+            "y2",
+            peopleScale2(
+              d3.mean(data, (d) => (d.day_of_week === m ? d.number_people : NaN))
+            )
+          )
+          .style("stroke", "#5555F0")
+          .style("stroke-width", 22);
+      }
+    });
+    </script>
     <p id="Viz_3">Visualization 3:</p>
     <svg
       id="hour"
@@ -135,6 +238,7 @@
       style="margin-top: 10px; margin-bottom: 25px"
     ></svg>
 
+    <div id="dayLegend" class="legend"> </div>
     <script>
       const svg3 = d3.select("#hour");
 
@@ -252,6 +356,24 @@
                     .attr("stroke", dayScale(day))
                     .attr("stroke-width", 2)
                     .attr("d", lineGen);
+          }
+
+          dayScale.domain().forEach(function(d,i) {
+            d3.select("#dayLegend")
+              .append("span")
+              .text(dayconverter(d))
+              .style("color",dayScale(d))
+          });
+
+
+          function dayconverter(x){
+            if (x == 0) return "Monday";
+            if (x == 1) return "Tuesday";
+            if (x == 2) return "Wednesday";
+            if (x == 3) return "Thursday";
+            if (x == 4) return "Friday";
+            if (x == 5) return "Saturday";
+            if (x == 6) return "Sunday";
           }
       });
     </script>
