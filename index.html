@@ -16,12 +16,15 @@
       }
 
       .legend span {
-        margin-right: 10px;
+        margin-left: 26px;
+        font-weight: bold;
+        font-size: 18px;
+        font-family: sans-serif;
       }
 
       .legend {
         display: block;
-        margin-left: 50px
+        margin-left: 50px;
       }
     </style>
   </head>
@@ -51,10 +54,89 @@
         .attr("transform", `translate(${margin1.left},${margin1.top})`);
 
       d3.csv("gym.csv", d3.autoType).then((data) => {
-        const monthScale = d3
-          .scaleLinear()
-          .domain([1, 12])
-          .range([10, chartWidth1 - 10]);
+        function sortMonthByAvgTemp() {
+          let avgTemps = [];
+          for (let m = 1; m <= 12; m++) {
+            avgTemps.push([
+              m,
+              d3.mean(data, (d) => (d.month === m ? d.temperature : NaN)),
+            ]);
+          }
+
+          function sortFunction(a, b) {
+            if (a[1] === b[1]) {
+              return 0;
+            } else {
+              return a[1] < b[1] ? -1 : 1;
+            }
+          }
+
+          function getMonthNames(m) {
+            let months = [];
+            for (let i = 0; i < m.length; i++) {
+              switch (m[i]) {
+                case 1:
+                  months.push("January");
+                  break;
+                case 2:
+                  months.push("February");
+                  break;
+                case 3:
+                  months.push("March");
+                  break;
+                case 4:
+                  months.push("April");
+                  break;
+                case 5:
+                  months.push("May");
+                  break;
+                case 6:
+                  months.push("June");
+                  break;
+                case 7:
+                  months.push("July");
+                  break;
+                case 8:
+                  months.push("August");
+                  break;
+                case 9:
+                  months.push("September");
+                  break;
+                case 10:
+                  months.push("October");
+                  break;
+                case 11:
+                  months.push("November");
+                  break;
+                case 12:
+                  months.push("December");
+                  break;
+              }
+            }
+            return months;
+          }
+
+          avgTemps.sort(sortFunction);
+          let sortedMonths = [];
+          for (let i = 0; i < avgTemps.length; i++) {
+            sortedMonths.push(avgTemps[i][0]);
+          }
+          console.log(avgTemps);
+          return getMonthNames(sortedMonths);
+        }
+
+        function getMonthRange() {
+          let pos = [];
+          for (let i = 1; i <= 12; i++) {
+            pos.push(((chartWidth1 - 100) / 12) * i);
+          }
+          return pos;
+        }
+
+        const monthScale = d3.scaleOrdinal(
+          sortMonthByAvgTemp(),
+          getMonthRange()
+        );
 
         const peopleExtent = d3.extent(data, (d) => d.number_people);
         const peopleScale = d3
@@ -89,33 +171,7 @@
           )
           .call(xAxis1);
 
-        svg1
-          .append("line")
-          .attr("x1", margin1.left - 5)
-          .attr("x2", margin1.left + 10)
-          .attr("y1", chartHeight1 + margin1.top)
-          .attr("y2", chartHeight1 + margin1.top)
-          .style("stroke", "black")
-          .style("stroke-width", "1");
-
-        svg1
-          .append("line")
-          .attr("x1", margin1.left + chartWidth1 - 10)
-          .attr("x2", margin1.left + chartWidth1 + 5)
-          .attr("y1", chartHeight1 + margin1.top)
-          .attr("y2", chartHeight1 + margin1.top)
-          .style("stroke", "black")
-          .style("stroke-width", "1");
-
         // plot bars
-        // function colorSemesters(m) {
-        //   if (m < 6 || m > 8) {
-        //     return "#5555F0";
-        //   } else {
-        //     return "#ff6961";
-        //   }
-        // }
-
         for (let m = 1; m <= 12; m++) {
           chart1
             .append("line")
@@ -128,7 +184,7 @@
                 d3.mean(data, (d) => (d.month === m ? d.number_people : NaN))
               )
             )
-            .style("stroke", "#5555F0")
+            .style("stroke", d3.interpolateTurbo(m / 12))
             .style("stroke-width", 22);
         }
       });
@@ -136,115 +192,125 @@
 
     <p id="Viz_2">Visualization 2:</p>
 
-    <svg id="day" width="800" height="320" style="margin-top: 10px; margin-bottom: 25px"
+    <svg
+      id="day"
+      width="800"
+      height="320"
+      style="margin-top: 10px; margin-bottom: 25px"
     ></svg>
 
     <script>
-    const svg2 = d3.select("#day");
+      const svg2 = d3.select("#day");
 
-    const width2 = svg1.attr("width");
-    const height2 = svg1.attr("height");
-    const margin2 = { left: 40, right: 5, top: 10, bottom: 40 };
+      const width2 = svg1.attr("width");
+      const height2 = svg1.attr("height");
+      const margin2 = { left: 40, right: 5, top: 10, bottom: 40 };
 
-    const chartWidth2 = width1 - margin2.left - margin2.right;
-    const chartHeight2 = height1 - margin2.top - margin2.bottom;
+      const chartWidth2 = width1 - margin2.left - margin2.right;
+      const chartHeight2 = height1 - margin2.top - margin2.bottom;
 
-    let annotations2 = svg2.append("g").attr("id", "annotations");
+      let annotations2 = svg2.append("g").attr("id", "annotations");
 
-    let chart2 = svg2
-      .append("g")
-      .attr("transform", `translate(${margin2.left},${margin2.top})`);
-
-    d3.csv("gym.csv", d3.autoType).then((data) => {
-      const dayScale = d3
-        .scaleLinear()
-        .domain([0, 6])
-        .range([10, chartWidth2 - 10]);
-
-      const peopleExtent2 = d3.extent(data, (d) => d.number_people);
-      const peopleScale2 = d3
-        .scaleLinear()
-        .domain([0, 50])
-        .range([chartHeight2, 0]);
-
-      let yAxis2 = d3.axisLeft(peopleScale2).ticks(14);
-      let yGridlines2 = d3
-        .axisLeft(peopleScale2)
-        .tickSize(-chartWidth2 - 5)
-        .ticks(14)
-        .tickFormat("");
-
-      annotations2
+      let chart2 = svg2
         .append("g")
-        .attr("transform", `translate(${margin2.left - 5},${margin2.top})`)
-        .call(yAxis2);
-      annotations2
-        .append("g")
-        .attr("class", "gridlines")
-        .attr("transform", `translate(${margin2.left - 5},${margin2.top})`)
-        .call(yGridlines2);
+        .attr("transform", `translate(${margin2.left},${margin2.top})`);
 
-      let xAxis2 = d3.axisBottom(dayScale).ticks(7);
+      d3.csv("gym.csv", d3.autoType).then((data) => {
+        const dayScale = d3
+          .scaleLinear()
+          .domain([0, 6])
+          .range([10, chartWidth2 - 10]);
 
-      annotations2
-        .append("g")
-        .attr(
-          "transform",
-          `translate(${margin3.left},${chartHeight2 + margin3.top})`
-        )
-        .call(xAxis2);
+        const peopleExtent2 = d3.extent(data, (d) => d.number_people);
+        const peopleScale2 = d3
+          .scaleLinear()
+          .domain([0, 50])
+          .range([chartHeight2, 0]);
 
-      svg2
-        .append("line")
-        .attr("x1", margin2.left - 5)
-        .attr("x2", margin2.left + 10)
-        .attr("y1", chartHeight2 + margin2.top)
-        .attr("y2", chartHeight2 + margin2.top)
-        .style("stroke", "black")
-        .style("stroke-width", "1");
+        let yAxis2 = d3.axisLeft(peopleScale2).ticks(14);
+        let yGridlines2 = d3
+          .axisLeft(peopleScale2)
+          .tickSize(-chartWidth2 - 5)
+          .ticks(14)
+          .tickFormat("");
 
-      svg2
-        .append("line")
-        .attr("x1", margin2.left + chartWidth2 - 10)
-        .attr("x2", margin2.left + chartWidth2 + 5)
-        .attr("y1", chartHeight2 + margin2.top)
-        .attr("y2", chartHeight2 + margin2.top)
-        .style("stroke", "black")
-        .style("stroke-width", "1");
+        annotations2
+          .append("g")
+          .attr("transform", `translate(${margin2.left - 5},${margin2.top})`)
+          .call(yAxis2);
+        annotations2
+          .append("g")
+          .attr("class", "gridlines")
+          .attr("transform", `translate(${margin2.left - 5},${margin2.top})`)
+          .call(yGridlines2);
 
+        let xAxis2 = d3.axisBottom(dayScale).ticks(7);
 
-      for (let m = 0; m <= 6; m++) {
-        chart2
-          .append("line")
-          .attr("x1", dayScale(m))
-          .attr("x2", dayScale(m))
-          .attr("y1", chartHeight2 - 0.5)
+        annotations2
+          .append("g")
           .attr(
-            "y2",
-            peopleScale2(
-              d3.mean(data, (d) => (d.day_of_week === m ? d.number_people : NaN))
-            )
+            "transform",
+            `translate(${margin3.left},${chartHeight2 + margin3.top})`
           )
-          .style("stroke", "#5555F0")
-          .style("stroke-width", 22);
-      }
-    });
+          .call(xAxis2);
+
+        svg2
+          .append("line")
+          .attr("x1", margin2.left - 5)
+          .attr("x2", margin2.left + 10)
+          .attr("y1", chartHeight2 + margin2.top)
+          .attr("y2", chartHeight2 + margin2.top)
+          .style("stroke", "black")
+          .style("stroke-width", "1");
+
+        svg2
+          .append("line")
+          .attr("x1", margin2.left + chartWidth2 - 10)
+          .attr("x2", margin2.left + chartWidth2 + 5)
+          .attr("y1", chartHeight2 + margin2.top)
+          .attr("y2", chartHeight2 + margin2.top)
+          .style("stroke", "black")
+          .style("stroke-width", "1");
+
+        for (let m = 0; m <= 6; m++) {
+          chart2
+            .append("line")
+            .attr("x1", dayScale(m))
+            .attr("x2", dayScale(m))
+            .attr("y1", chartHeight2 - 0.5)
+            .attr(
+              "y2",
+              peopleScale2(
+                d3.mean(data, (d) =>
+                  d.day_of_week === m ? d.number_people : NaN
+                )
+              )
+            )
+            .style("stroke", "#5555F0")
+            .style("stroke-width", 22);
+        }
+      });
     </script>
     <p id="Viz_3">Visualization 3:</p>
     <svg
       id="hour"
       width="800"
       height="350"
-      style="margin-top: 10px; margin-bottom: 25px"
+      style="margin-top: 10px; margin-bottom: 0px"
     ></svg>
 
-    <div id="dayLegend" class="legend"> </div>
+    <div id="dayLegend" class="legend" style="
+        margin-top: 0;
+        padding: 5px;
+        border: solid black 1px;
+        width: 724px;">
+    </div>
     <script>
       const svg3 = d3.select("#hour");
 
       const width3 = svg3.attr("width");
       const height3 = svg3.attr("height");
-      const margin3 = { left: 40, right: 5, top: 10, bottom: 20 };
+      const margin3 = { left: 55, right: 5, top: 10, bottom: 40 };
 
       const chartWidth3 = width3 - margin3.left - margin3.right;
       const chartHeight3 = height3 - margin3.top - margin3.bottom;
@@ -256,7 +322,6 @@
         .attr("transform", `translate(${margin3.left},${margin3.top})`);
 
       d3.csv("gym.csv", d3.autoType).then((data) => {
-
         const hourExtent = d3.extent(data, (d) => d.hour);
 
         const hourScale = d3
@@ -301,11 +366,11 @@
             }
           });
 
-          let xGridlines3 = d3
-            .axisBottom(hourScale)
-            .tickSize(-chartHeight3 - 5)
-            .ticks(23)
-            .tickFormat("");
+        let xGridlines3 = d3
+          .axisBottom(hourScale)
+          .tickSize(-chartHeight3 - 5)
+          .ticks(23)
+          .tickFormat("");
 
         annotations3
           .append("g")
@@ -318,63 +383,87 @@
         annotations3
           .append("g")
           .attr("class", "gridlines")
-          .attr("transform", `translate(${margin3.left},${chartHeight3 + margin3.top})`)
+          .attr(
+            "transform",
+            `translate(${margin3.left},${chartHeight3 + margin3.top})`
+          )
           .call(xGridlines3);
 
-          let niceDataArray = [];
-          for (let day = 0; day < 7; day++) { // 0 = Monday, 6 = Sunday
-              let niceData = [];
-              for (let h = 0; h < 24; h++) {
-                  let average = d3.mean(data, (d) => ((d.hour === h && d.day_of_week === day) ? d.number_people : NaN))
-                  niceData.push({
-                      day: day,
-                      hour: h,
-                      hour_average: average
-                    });
+          svg3.append("text")
+    .attr("class", "x label")
+    .attr("text-anchor", "middle")
+    .attr("x", chartWidth3/2 + 20)
+    .attr("y", chartHeight3 + 45)
+    .text("Hour of Day");
 
-                    // Append the circles for the chart now, while we have access to all the needed data
-                    chart3.append("circle")
-                             .attr("r", 3)
-                             .attr("fill", dayScale(day))
-                             .attr("cx", hourScale(h) )
-                             .attr("cy", peopleScale(average) );
-              }
-              niceDataArray[day] = niceData;
+    svg3.append("text")
+    .attr("class", "y label")
+    .attr("text-anchor", "end")
+    .attr("x", -76)
+    .attr("y", 16)
+    .attr("dy", ".45em")
+    .attr("transform", "rotate(-90)")
+    .text("Number of People");
+        let niceDataArray = [];
+        for (let day = 0; day < 7; day++) {
+          // 0 = Monday, 6 = Sunday
+          let niceData = [];
+          for (let h = 0; h < 24; h++) {
+            let average = d3.mean(data, (d) =>
+              d.hour === h && d.day_of_week === day ? d.number_people : NaN
+            );
+            niceData.push({
+              day: day,
+              hour: h,
+              hour_average: average,
+            });
+
+            // Append the circles for the chart now, while we have access to all the needed data
+            chart3
+              .append("circle")
+              .attr("r", 3)
+              .attr("fill", dayScale(day))
+              .attr("cx", hourScale(h))
+              .attr("cy", peopleScale(average));
           }
-          // console.log(niceDataArray);
+          niceDataArray[day] = niceData;
+        }
+        // console.log(niceDataArray);
 
-          var lineGen = d3.line()
-                          .x( d => hourScale(d.hour) )
-                          .y( d => peopleScale(d.hour_average) )
-                          .curve(d3.curveMonotoneX);
+        var lineGen = d3
+          .line()
+          .x((d) => hourScale(d.hour))
+          .y((d) => peopleScale(d.hour_average))
+          .curve(d3.curveMonotoneX);
 
-          for (let day = 0; day < 7; day++) { // 0 = Monday, 6 = Sunday
-              chart3.append("path")
-                    .datum(niceDataArray[day])
-                    .attr("class", "line")
-                    .attr("fill", "none")
-                    .attr("stroke", dayScale(day))
-                    .attr("stroke-width", 2)
-                    .attr("d", lineGen);
-          }
+        for (let day = 0; day < 7; day++) {
+          // 0 = Monday, 6 = Sunday
+          chart3
+            .append("path")
+            .datum(niceDataArray[day])
+            .attr("class", "line")
+            .attr("fill", "none")
+            .attr("stroke", dayScale(day))
+            .attr("stroke-width", 2)
+            .attr("d", lineGen);
+        }
 
-          dayScale.domain().forEach(function(d,i) {
-            d3.select("#dayLegend")
-              .append("span")
-              .text(dayconverter(d))
-              .style("color",dayScale(d))
-          });
+        dayScale.domain().forEach(function (d, i) {
+          d3.select("#dayLegend")
+            .append("span")
+            .text(dayconverter(d))
+            .style("color", dayScale(d));
+        });
 
-
-          function dayconverter(x){
-            if (x == 0) return "Monday";
-            if (x == 1) return "Tuesday";
-            if (x == 2) return "Wednesday";
-            if (x == 3) return "Thursday";
-            if (x == 4) return "Friday";
-            if (x == 5) return "Saturday";
-            if (x == 6) return "Sunday";
-          }
+        function dayconverter(x) {
+          if (x == 0) return "Monday";
+          if (x == 1) return "Tuesday";
+          if (x == 2) return "Wednesday";
+          if (x == 3) return "Thursday";
+          if (x == 4) return "Friday";
+          if (x == 5) return "Saturday";
+          if (x == 6) return "Sunday";
+        }
       });
     </script>
   </body>
