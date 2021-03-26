@@ -16,7 +16,9 @@
       }
 
       .legend span {
-        margin-right: 10px;
+        margin-left: 31px;
+        font-weight: bold;
+        font-size: 18px;
       }
 
       .legend {
@@ -293,10 +295,15 @@
       id="hour"
       width="800"
       height="350"
-      style="margin-top: 10px; margin-bottom: 25px"
+      style="margin-top: 10px; margin-bottom: 0px"
     ></svg>
 
-    <div id="dayLegend" class="legend"></div>
+    <div id="dayLegend" class="legend" style="
+        margin-top: 0;
+        padding: 5px;
+        border: solid black 1px;
+        width: 724px;">
+    </div>
     <script>
       const svg3 = d3.select("#hour");
 
