@@ -42,7 +42,7 @@
 
       const width1 = svg1.attr("width");
       const height1 = svg1.attr("height");
-      const margin1 = { left: 40, right: 5, top: 10, bottom: 40 };
+      const margin1 = { left: 60, right: 5, top: 10, bottom: 40 };
 
       const chartWidth1 = width1 - margin1.left - margin1.right;
       const chartHeight1 = height1 - margin1.top - margin1.bottom;
@@ -170,6 +170,24 @@
             `translate(${margin1.left},${chartHeight1 + margin1.top})`
           )
           .call(xAxis1);
+
+        svg1
+          .append("text")
+          .attr("class", "x label")
+          .attr("text-anchor", "middle")
+          .attr("x", chartWidth1 / 2 + 20)
+          .attr("y", chartHeight1 + 45)
+          .text("Months Sorted by Ascending Average Temperature");
+
+        svg1
+          .append("text")
+          .attr("class", "y label")
+          .attr("text-anchor", "end")
+          .attr("x", -60)
+          .attr("y", 16)
+          .attr("dy", ".45em")
+          .attr("transform", "rotate(-90)")
+          .text("Average Number of People");
 
         // plot bars
         for (let m = 1; m <= 12; m++) {
@@ -299,12 +317,11 @@
       style="margin-top: 10px; margin-bottom: 0px"
     ></svg>
 
-    <div id="dayLegend" class="legend" style="
-        margin-top: 0;
-        padding: 5px;
-        border: solid black 1px;
-        width: 724px;">
-    </div>
+    <div
+      id="dayLegend"
+      class="legend"
+      style="margin-top: 0; padding: 5px; border: solid black 1px; width: 724px"
+    ></div>
     <script>
       const svg3 = d3.select("#hour");
 
@@ -389,21 +406,24 @@
           )
           .call(xGridlines3);
 
-          svg3.append("text")
-    .attr("class", "x label")
-    .attr("text-anchor", "middle")
-    .attr("x", chartWidth3/2 + 20)
-    .attr("y", chartHeight3 + 45)
-    .text("Hour of Day");
+        svg3
+          .append("text")
+          .attr("class", "x label")
+          .attr("text-anchor", "middle")
+          .attr("x", chartWidth3 / 2 + 20)
+          .attr("y", chartHeight3 + 45)
+          .text("Hour of Day");
 
-    svg3.append("text")
-    .attr("class", "y label")
-    .attr("text-anchor", "end")
-    .attr("x", -76)
-    .attr("y", 16)
-    .attr("dy", ".45em")
-    .attr("transform", "rotate(-90)")
-    .text("Number of People");
+        svg3
+          .append("text")
+          .attr("class", "y label")
+          .attr("text-anchor", "end")
+          .attr("x", -76)
+          .attr("y", 16)
+          .attr("dy", ".45em")
+          .attr("transform", "rotate(-90)")
+          .text("Number of People");
+
         let niceDataArray = [];
         for (let day = 0; day < 7; day++) {
           // 0 = Monday, 6 = Sunday
