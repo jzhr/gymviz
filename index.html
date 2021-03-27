@@ -1,476 +1,482 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+
+<head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Project 1</title>
     <script src="https://d3js.org/d3.v6.min.js"></script>
     <style>
+        body {
+            font-family: sans-serif;
+        }
 
-      body {
-         font-family: sans-serif;
-      }
+        .gridlines line {
+            stroke: lightgray;
+        }
 
-      .gridlines line {
-        stroke: lightgray;
-      }
+        .gridlines .domain {
+            stroke: none;
+        }
 
-      .gridlines .domain {
-        stroke: none;
-      }
+        .legend span {
+            margin-left: 26px;
+            font-weight: bold;
+            font-size: 18px;
+            font-family: sans-serif;
+        }
 
-      .legend span {
-        margin-left: 26px;
-        font-weight: bold;
-        font-size: 18px;
-        font-family: sans-serif;
-      }
+        .x_label,
+        .y_label {
+            font-size: 14px;
+        }
 
-      .x_label, .y_label {
-          font-size: 14px;
-      }
+        .legend {
+            display: block;
+            margin-left: 50px;
+        }
 
-      .legend {
-        display: block;
-        margin-left: 50px;
-      }
+        hr {
+            margin: 2rem;
+            width: 800px;
+            background-color: black;
+            height: 1px;
+        }
 
-      hr {
-        margin: 2rem;
-        width: 800px;
-        background-color: black;
-        height: 1px;
-      }
-
-      h3 {
-        margin-left: 50px;
-        margin-bottom: 0;
-        background: #afeeee;
-        width: 725px;
-        padding: 10px;
-        text-align: center;
-      }
-
+        h3 {
+            margin-left: 50px;
+            margin-bottom: 0;
+            background: #afeeee;
+            width: 725px;
+            padding: 10px;
+            text-align: center;
+        }
     </style>
-  </head>
-  <body>
+</head>
+
+<body>
     <h3>Exploration of Campus Gym Crowdedness at Different Times</h3>
     <!-- <p id="Viz_3">Visualization 1:</p> -->
-    <svg
-      id="hour"
-      width="800"
-      height="350"
-      style="margin-top: 10px; margin-bottom: 0px"
-    ></svg>
+    <svg id="hour" width="800" height="350" style="margin-top: 10px; margin-bottom: 0px"></svg>
 
-    <div
-      id="dayLegend"
-      class="legend"
-      style="margin-top: 0; padding: 5px; border: solid black 1px; width: 724px"
-    ></div>
+    <div id="dayLegend" class="legend" style="margin-top: 0; padding: 5px; border: solid black 1px; width: 724px"></div>
     <script>
+        const svg3 = d3.select("#hour");
 
-      const svg3 = d3.select("#hour");
+        const width3 = svg3.attr("width");
+        const height3 = svg3.attr("height");
+        const margin3 = {
+            left: 55,
+            right: 5,
+            top: 10,
+            bottom: 40
+        };
 
-      const width3 = svg3.attr("width");
-      const height3 = svg3.attr("height");
-      const margin3 = { left: 55, right: 5, top: 10, bottom: 40 };
+        const chartWidth3 = width3 - margin3.left - margin3.right;
+        const chartHeight3 = height3 - margin3.top - margin3.bottom;
 
-      const chartWidth3 = width3 - margin3.left - margin3.right;
-      const chartHeight3 = height3 - margin3.top - margin3.bottom;
+        let annotations3 = svg3.append("g").attr("id", "annotations");
 
-      let annotations3 = svg3.append("g").attr("id", "annotations");
+        let chart3 = svg3
+            .append("g")
+            .attr("transform", `translate(${margin3.left},${margin3.top})`);
 
-      let chart3 = svg3
-        .append("g")
-        .attr("transform", `translate(${margin3.left},${margin3.top})`);
+        d3.csv("gym.csv", d3.autoType).then((data) => {
+            const hourExtent = d3.extent(data, (d) => d.hour);
 
-      d3.csv("gym.csv", d3.autoType).then((data) => {
-        const hourExtent = d3.extent(data, (d) => d.hour);
+            const hourScale = d3
+                .scaleLinear()
+                .domain(hourExtent)
+                .range([10, chartWidth3 - 10]);
 
-        const hourScale = d3
-          .scaleLinear()
-          .domain(hourExtent)
-          .range([10, chartWidth3 - 10]);
+            const peopleExtent = d3.extent(data, (d) => d.number_people);
+            const peopleScale = d3
+                .scaleLinear()
+                .domain([0, 55])
+                .range([chartHeight3, 0]);
 
-        const peopleExtent = d3.extent(data, (d) => d.number_people);
-        const peopleScale = d3
-          .scaleLinear()
-          .domain([0, 55])
-          .range([chartHeight3, 0]);
+            const dayScale = d3.scaleOrdinal(d3.schemeTableau10); //TODO: Change this?
 
-        const dayScale = d3.scaleOrdinal(d3.schemeTableau10); //TODO: Change this?
+            let yAxis3 = d3.axisLeft(peopleScale).ticks(14);
+            let yGridlines3 = d3
+                .axisLeft(peopleScale)
+                .tickSize(-chartWidth3)
+                .ticks(14)
+                .tickFormat("");
 
-        let yAxis3 = d3.axisLeft(peopleScale).ticks(14);
-        let yGridlines3 = d3
-          .axisLeft(peopleScale)
-          .tickSize(-chartWidth3)
-          .ticks(14)
-          .tickFormat("");
+            annotations3
+                .append("g")
+                .attr("transform", `translate(${margin3.left},${margin3.top})`)
+                .call(yAxis3);
 
-        annotations3
-          .append("g")
-          .attr("transform", `translate(${margin3.left},${margin3.top})`)
-          .call(yAxis3);
+            annotations3
+                .append("g")
+                .attr("class", "gridlines")
+                .attr("transform", `translate(${margin3.left},${margin3.top})`)
+                .call(yGridlines3);
 
-        annotations3
-          .append("g")
-          .attr("class", "gridlines")
-          .attr("transform", `translate(${margin3.left},${margin3.top})`)
-          .call(yGridlines3);
+            let xAxis3 = d3
+                .axisBottom(hourScale)
+                .ticks(23)
+                .tickFormat((d) => {
+                    if (d < 12) {
+                        return (d === 0 ? d + 12 : d) + "AM";
+                    } else {
+                        return (d === 12 ? d : d - 12) + "PM";
+                    }
+                });
 
-        let xAxis3 = d3
-          .axisBottom(hourScale)
-          .ticks(23)
-          .tickFormat((d) => {
-            if (d < 12) {
-              return (d === 0 ? d + 12 : d) + "AM";
-            } else {
-              return (d === 12 ? d : d - 12) + "PM";
+            let xGridlines3 = d3
+                .axisBottom(hourScale)
+                .tickSize(-chartHeight3 - 5)
+                .ticks(23)
+                .tickFormat("");
+
+            annotations3
+                .append("g")
+                .attr(
+                    "transform",
+                    `translate(${margin3.left},${chartHeight3 + margin3.top})`
+                )
+                .call(xAxis3);
+
+            annotations3
+                .append("g")
+                .attr("class", "gridlines")
+                .attr(
+                    "transform",
+                    `translate(${margin3.left},${chartHeight3 + margin3.top})`
+                )
+                .call(xGridlines3);
+
+            svg3
+                .append("text")
+                .attr("class", "x_label")
+                .attr("text-anchor", "middle")
+                .attr("x", chartWidth3 / 2 + 20)
+                .attr("y", chartHeight3 + 45)
+                .text("Hour of Day");
+
+            svg3
+                .append("text")
+                .attr("class", "y_label")
+                .attr("text-anchor", "end")
+                .attr("x", -76)
+                .attr("y", 16)
+                .attr("dy", ".45em")
+                .attr("transform", "rotate(-90)")
+                .text("Average Number of People");
+
+            let niceDataArray = [];
+            for (let day = 0; day < 7; day++) {
+                // 0 = Monday, 6 = Sunday
+                let niceData = [];
+                for (let h = 0; h < 24; h++) {
+                    let average = d3.mean(data, (d) =>
+                        d.hour === h && d.day_of_week === day ? d.number_people : NaN
+                    );
+                    niceData.push({
+                        day: day,
+                        hour: h,
+                        hour_average: average,
+                    });
+
+                    // Append the circles for the chart now, while we have access to all the needed data
+                    chart3
+                        .append("circle")
+                        .attr("r", 3)
+                        .attr("fill", dayScale(day))
+                        .attr("cx", hourScale(h))
+                        .attr("cy", peopleScale(average));
+                }
+                niceDataArray[day] = niceData;
             }
-          });
+            // console.log(niceDataArray);
 
-        let xGridlines3 = d3
-          .axisBottom(hourScale)
-          .tickSize(-chartHeight3 - 5)
-          .ticks(23)
-          .tickFormat("");
+            var lineGen = d3
+                .line()
+                .x((d) => hourScale(d.hour))
+                .y((d) => peopleScale(d.hour_average))
+                .curve(d3.curveMonotoneX);
 
-        annotations3
-          .append("g")
-          .attr(
-            "transform",
-            `translate(${margin3.left},${chartHeight3 + margin3.top})`
-          )
-          .call(xAxis3);
+            for (let day = 0; day < 7; day++) {
+                // 0 = Monday, 6 = Sunday
+                chart3
+                    .append("path")
+                    .datum(niceDataArray[day])
+                    .attr("class", "line")
+                    .attr("fill", "none")
+                    .attr("stroke", dayScale(day))
+                    .attr("stroke-width", 2)
+                    .attr("d", lineGen);
+            }
 
-        annotations3
-          .append("g")
-          .attr("class", "gridlines")
-          .attr(
-            "transform",
-            `translate(${margin3.left},${chartHeight3 + margin3.top})`
-          )
-          .call(xGridlines3);
-
-        svg3
-          .append("text")
-          .attr("class", "x_label")
-          .attr("text-anchor", "middle")
-          .attr("x", chartWidth3 / 2 + 20)
-          .attr("y", chartHeight3 + 45)
-          .text("Hour of Day");
-
-        svg3
-          .append("text")
-          .attr("class", "y_label")
-          .attr("text-anchor", "end")
-          .attr("x", -76)
-          .attr("y", 16)
-          .attr("dy", ".45em")
-          .attr("transform", "rotate(-90)")
-          .text("Average Number of People");
-
-        let niceDataArray = [];
-        for (let day = 0; day < 7; day++) {
-          // 0 = Monday, 6 = Sunday
-          let niceData = [];
-          for (let h = 0; h < 24; h++) {
-            let average = d3.mean(data, (d) =>
-              d.hour === h && d.day_of_week === day ? d.number_people : NaN
-            );
-            niceData.push({
-              day: day,
-              hour: h,
-              hour_average: average,
+            dayScale.domain().forEach(function(d, i) {
+                d3.select("#dayLegend")
+                    .append("span")
+                    .text(dayconverter(d))
+                    .style("color", dayScale(d));
             });
 
-            // Append the circles for the chart now, while we have access to all the needed data
-            chart3
-              .append("circle")
-              .attr("r", 3)
-              .attr("fill", dayScale(day))
-              .attr("cx", hourScale(h))
-              .attr("cy", peopleScale(average));
-          }
-          niceDataArray[day] = niceData;
-        }
-        // console.log(niceDataArray);
-
-        var lineGen = d3
-          .line()
-          .x((d) => hourScale(d.hour))
-          .y((d) => peopleScale(d.hour_average))
-          .curve(d3.curveMonotoneX);
-
-        for (let day = 0; day < 7; day++) {
-          // 0 = Monday, 6 = Sunday
-          chart3
-            .append("path")
-            .datum(niceDataArray[day])
-            .attr("class", "line")
-            .attr("fill", "none")
-            .attr("stroke", dayScale(day))
-            .attr("stroke-width", 2)
-            .attr("d", lineGen);
-        }
-
-        dayScale.domain().forEach(function (d, i) {
-          d3.select("#dayLegend")
-            .append("span")
-            .text(dayconverter(d))
-            .style("color", dayScale(d));
+            function dayconverter(x) {
+                if (x == 0) return "Monday";
+                if (x == 1) return "Tuesday";
+                if (x == 2) return "Wednesday";
+                if (x == 3) return "Thursday";
+                if (x == 4) return "Friday";
+                if (x == 5) return "Saturday";
+                if (x == 6) return "Sunday";
+            }
         });
-
-        function dayconverter(x) {
-          if (x == 0) return "Monday";
-          if (x == 1) return "Tuesday";
-          if (x == 2) return "Wednesday";
-          if (x == 3) return "Thursday";
-          if (x == 4) return "Friday";
-          if (x == 5) return "Saturday";
-          if (x == 6) return "Sunday";
-        }
-      });
     </script>
 
     <hr />
 
     <!-- <p id="Viz_1">Visualization 2:</p> -->
-    <svg
-      id="month"
-      width="800"
-      height="320"
-      style="margin-top: 10px; margin-bottom: 25px"
-    >
-  </svg>
+    <svg id="month" width="800" height="340" style="margin-top: 10px; margin-bottom: 25px">
+    </svg>
 
     <script>
+        const svg1 = d3.select("#month");
 
-      const svg1 = d3.select("#month");
+        const width1 = svg1.attr("width");
+        const height1 = svg1.attr("height");
+        const margin1 = {
+            left: 60,
+            right: 5,
+            top: 10,
+            bottom: 100
+        };
 
-      const width1 = svg1.attr("width");
-      const height1 = svg1.attr("height");
-      const margin1 = { left: 60, right: 5, top: 10, bottom: 80 };
+        const chartWidth1 = width1 - margin1.left - margin1.right;
+        const chartHeight1 = height1 - margin1.top - margin1.bottom;
 
-      const chartWidth1 = width1 - margin1.left - margin1.right;
-      const chartHeight1 = height1 - margin1.top - margin1.bottom;
+        let annotations1 = svg1.append("g").attr("id", "annotations");
 
-      let annotations1 = svg1.append("g").attr("id", "annotations");
+        let chart1 = svg1
+            .append("g")
+            .attr("transform", `translate(${margin1.left},${margin1.top})`);
 
-      let chart1 = svg1
-        .append("g")
-        .attr("transform", `translate(${margin1.left},${margin1.top})`);
+        d3.csv("gym.csv", d3.autoType).then((data) => {
+            function sortMonthByAvgTemp() {
+                let avgTemps = [];
+                for (let m = 1; m <= 12; m++) {
+                    avgTemps.push([
+                        m,
+                        d3.mean(data, (d) => (d.month === m ? d.temperature : NaN)),
+                    ]);
+                }
 
-      d3.csv("gym.csv", d3.autoType).then((data) => {
-        function sortMonthByAvgTemp() {
-          let avgTemps = [];
-          for (let m = 1; m <= 12; m++) {
-            avgTemps.push([
-              m,
-              d3.mean(data, (d) => (d.month === m ? d.temperature : NaN)),
-            ]);
-          }
+                function sortFunction(a, b) {
+                    if (a[1] === b[1]) {
+                        return 0;
+                    } else {
+                        return a[1] < b[1] ? -1 : 1;
+                    }
+                }
 
-          function sortFunction(a, b) {
-            if (a[1] === b[1]) {
-              return 0;
-            } else {
-              return a[1] < b[1] ? -1 : 1;
+                function getMonthNames(m) {
+                    let months = [];
+                    for (let i = 0; i < m.length; i++) {
+                        switch (m[i]) {
+                            case 1:
+                                months.push("January");
+                                break;
+                            case 2:
+                                months.push("February");
+                                break;
+                            case 3:
+                                months.push("March");
+                                break;
+                            case 4:
+                                months.push("April");
+                                break;
+                            case 5:
+                                months.push("May");
+                                break;
+                            case 6:
+                                months.push("June");
+                                break;
+                            case 7:
+                                months.push("July");
+                                break;
+                            case 8:
+                                months.push("August");
+                                break;
+                            case 9:
+                                months.push("September");
+                                break;
+                            case 10:
+                                months.push("October");
+                                break;
+                            case 11:
+                                months.push("November");
+                                break;
+                            case 12:
+                                months.push("December");
+                                break;
+                        }
+                    }
+                    return months;
+                }
+
+                avgTemps.sort(sortFunction);
+                let sortedMonths = [];
+                for (let i = 0; i < avgTemps.length; i++) {
+                    sortedMonths.push(avgTemps[i][0]);
+                }
+                console.log(avgTemps);
+                return getMonthNames(sortedMonths);
             }
-          }
 
-          function getMonthNames(m) {
-            let months = [];
-            for (let i = 0; i < m.length; i++) {
-              switch (m[i]) {
-                case 1:
-                  months.push("January");
-                  break;
-                case 2:
-                  months.push("February");
-                  break;
-                case 3:
-                  months.push("March");
-                  break;
-                case 4:
-                  months.push("April");
-                  break;
-                case 5:
-                  months.push("May");
-                  break;
-                case 6:
-                  months.push("June");
-                  break;
-                case 7:
-                  months.push("July");
-                  break;
-                case 8:
-                  months.push("August");
-                  break;
-                case 9:
-                  months.push("September");
-                  break;
-                case 10:
-                  months.push("October");
-                  break;
-                case 11:
-                  months.push("November");
-                  break;
-                case 12:
-                  months.push("December");
-                  break;
-              }
+            function getMonthRange() {
+                let pos = [];
+                for (let i = 1; i <= 12; i++) {
+                    pos.push(((chartWidth1 - 100) / 12) * i);
+                }
+                return pos;
             }
-            return months;
-          }
 
-          avgTemps.sort(sortFunction);
-          let sortedMonths = [];
-          for (let i = 0; i < avgTemps.length; i++) {
-            sortedMonths.push(avgTemps[i][0]);
-          }
-          console.log(avgTemps);
-          return getMonthNames(sortedMonths);
-        }
+            const monthScale = d3.scaleOrdinal(
+                sortMonthByAvgTemp(),
+                getMonthRange()
+            );
 
-        function getMonthRange() {
-          let pos = [];
-          for (let i = 1; i <= 12; i++) {
-            pos.push(((chartWidth1 - 100) / 12) * i);
-          }
-          return pos;
-        }
+            const peopleExtent = d3.extent(data, (d) => d.number_people);
+            const peopleScale = d3
+                .scaleLinear()
+                .domain([0, 40])
+                .range([chartHeight1, 0]);
 
-        const monthScale = d3.scaleOrdinal(
-          sortMonthByAvgTemp(),
-          getMonthRange()
-        );
+            let yAxis1 = d3.axisLeft(peopleScale).ticks(14);
+            let yGridlines1 = d3
+                .axisLeft(peopleScale)
+                .tickSize(-chartWidth1 - 5)
+                .ticks(14)
+                .tickFormat("");
 
-        const peopleExtent = d3.extent(data, (d) => d.number_people);
-        const peopleScale = d3
-          .scaleLinear()
-          .domain([0, 40])
-          .range([chartHeight1, 0]);
+            annotations1
+                .append("g")
+                .attr("transform", `translate(${margin1.left - 5},${margin1.top})`)
+                .call(yAxis1);
+            annotations1
+                .append("g")
+                .attr("class", "gridlines")
+                .attr("transform", `translate(${margin1.left - 5},${margin1.top})`)
+                .call(yGridlines1);
 
-        let yAxis1 = d3.axisLeft(peopleScale).ticks(14);
-        let yGridlines1 = d3
-          .axisLeft(peopleScale)
-          .tickSize(-chartWidth1 - 5)
-          .ticks(14)
-          .tickFormat("");
+            let xAxis1 = d3.axisBottom(monthScale).ticks(12);
 
-        annotations1
-          .append("g")
-          .attr("transform", `translate(${margin1.left - 5},${margin1.top})`)
-          .call(yAxis1);
-        annotations1
-          .append("g")
-          .attr("class", "gridlines")
-          .attr("transform", `translate(${margin1.left - 5},${margin1.top})`)
-          .call(yGridlines1);
+            annotations1
+                .append("g")
+                .attr(
+                    "transform",
+                    `translate(${margin1.left},${chartHeight1 + margin1.top})`
+                )
+                .call(xAxis1);
 
-        let xAxis1 = d3.axisBottom(monthScale).ticks(12);
+            // axis labels
+            svg1
+                .append("text")
+                .attr("class", "x_label")
+                .attr("text-anchor", "middle")
+                .attr("x", chartWidth1 / 2 + 20)
+                .attr("y", chartHeight1 + 45)
+                .text("Months Sorted by Ascending Average Temperature");
+            svg1
+                .append("text")
+                .attr("class", "y_label")
+                .attr("text-anchor", "end")
+                .attr("x", -60)
+                .attr("y", 16)
+                .attr("dy", ".45em")
+                .attr("transform", "rotate(-90)")
+                .text("Average Number of People");
 
-        annotations1
-          .append("g")
-          .attr(
-            "transform",
-            `translate(${margin1.left},${chartHeight1 + margin1.top})`
-          )
-          .call(xAxis1);
+            // plot bars
+            let temps = [];
+            for (let m = 1; m <= 12; m++) {
+                temps.push(d3.mean(data, (d) => (d.month === m ? d.temperature : NaN)));
+            }
+            temps.sort((a, b) => a - b);
 
-        // axis labels
-        svg1
-          .append("text")
-          .attr("class", "x_label")
-          .attr("text-anchor", "middle")
-          .attr("x", chartWidth1 / 2 + 20)
-          .attr("y", chartHeight1 + 45)
-          .text("Months Sorted by Ascending Average Temperature");
-        svg1
-          .append("text")
-          .attr("class", "y_label")
-          .attr("text-anchor", "end")
-          .attr("x", -60)
-          .attr("y", 16)
-          .attr("dy", ".45em")
-          .attr("transform", "rotate(-90)")
-          .text("Average Number of People");
+            const tempScale = d3.scaleLinear().domain([50, 65]) //min,max average temperature
+                .range([d3.color("rgb(84, 106, 250)"), d3.color("rgb(231, 74, 74)")]);
 
-          // plot bars
-          let temps = [];
-          for (let m = 1; m <= 12; m++) {
-            temps.push(d3.mean(data, (d) => (d.month === m ? d.temperature : NaN)));
-          }
-          temps.sort((a, b) => a-b);
+            for (let m = 1; m <= 12; m++) {
+                chart1
+                    .append("line")
+                    .attr("x1", monthScale(m))
+                    .attr("x2", monthScale(m))
+                    .attr("y1", chartHeight1 - 0.5)
+                    .attr(
+                        "y2",
+                        peopleScale(d3.mean(data, (d) => (d.month === m ? d.number_people : NaN)))
+                    )
+                    // .style("stroke", "blue")
+                    .style("stroke", tempScale(temps[m - 1]))
+                    .style("stroke-width", 22);
+            }
 
-          console.log(temps);
+            var definitions = svg1.append("defs");
+            var linearGradient = definitions.append("linearGradient")
+                .attr("id", "linear-gradient")
+                .attr("x1", "0%")
+                .attr("y1", "0%")
+                .attr("x2", "100%")
+                .attr("y2", "0%");
 
-          const tempScale = d3.scaleLinear().domain([50,65]) //min,max average temperature
-                              .range([d3.color("rgb(84, 106, 250)"), d3.color("rgb(231, 74, 74)")]);
+            linearGradient.append("stop")
+                .attr("offset", "0%")
+                .attr("stop-color", "rgb(84, 106, 250)");
 
-          console.log(tempScale);
+            linearGradient.append("stop")
+                .attr("offset", "1000%")
+                .attr("stop-color", "rgb(231, 74, 74)");
 
-          for (let m = 1; m <= 12; m++) {
-              console.log(temps[m-1]);
-            chart1
-              .append("line")
-              .attr("x1", monthScale(m))
-              .attr("x2", monthScale(m))
-              .attr("y1", chartHeight1 - 0.5)
-              .attr(
-                "y2",
-                peopleScale(d3.mean(data, (d) => (d.month === m ? d.number_people : NaN)))
-              )
-              // .style("stroke", "blue")
-              .style("stroke", tempScale(temps[m-1]))
-              .style("stroke-width", 22);
-          }
-
-
-          var definitions = svg1.append("defs");
-          var linearGradient = definitions.append("linearGradient")
-                                  .attr("id", "linear-gradient")
-                                  .attr("x1", "0%")
-                                  .attr("y1", "0%")
-                                  .attr("x2", "100%")
-                                  .attr("y2", "0%");
-
-          linearGradient.append("stop")
-              .attr("offset", "0%")
-              .attr("stop-color", "rgb(84, 106, 250)");
-
-              linearGradient.append("stop")
-                            .attr("offset", "1000%")
-                            .attr("stop-color", "rgb(231, 74, 74)");
-
-          svg1.append("rect")
-                .attr("width", chartWidth1/3)
-                .attr("height", 40)
-                .attr('x', chartWidth1/3 )
+            svg1.append("rect")
+                .attr("width", chartWidth1 / 3)
+                .attr("height", 10)
+                .attr('x', chartWidth1 / 3)
                 .attr('y', chartHeight1 + 80)
                 .style("fill", "url(#linear-gradient)");
 
 
-      svg1.append('text')
-          .attr('x', chartWidth1/3)
-          .attr('y', chartHeight1 + 79)
-          .attr('stroke', 'rgb(84, 106, 250')
-          .style("font-size", 13)
-          .text("Colder")
+            svg1.append('text')
+                .attr('x', chartWidth1 / 3)
+                .attr('y', chartHeight1 + 79)
+                .attr('stroke', 'rgb(84, 106, 250')
+                .style("font-size", 13)
+                .text("Colder")
 
-          svg1.append('text')
-              .attr('x', chartWidth1/2 + 80)
-              .attr('y', chartHeight1 + 79)
-              .attr('stroke', 'rgb(231, 74, 74)')
-              .style("font-size", 13)
-              .text("Warmer")
+            svg1.append('text')
+                .attr('x', chartWidth1 / 3)
+                .attr('y', chartHeight1 + 101)
+                .attr('stroke', 'rgb(84, 106, 250')
+                .style("font-size", 13)
+                .text("50°F")
+
+            svg1.append('text')
+                .attr('x', chartWidth1 / 2 + 76)
+                .attr('y', chartHeight1 + 79)
+                .attr('stroke', 'rgb(231, 74, 74)')
+                .style("font-size", 13)
+                .text("Warmer")
+
+            svg1.append('text')
+                .attr('x', chartWidth1 / 2 + 95)
+                .attr('y', chartHeight1 + 101)
+                .attr('stroke', 'rgb(231, 74, 74)')
+                .style("font-size", 13)
+                .text("65°F")
+
+
 
 
         });
     </script>
 
-  </body>
+</body>
+
 </html>
