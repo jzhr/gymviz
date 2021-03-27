@@ -64,7 +64,6 @@
 
     <div id="dayLegend" class="legend" style="margin-top: 0; padding: 5px; border: solid black 1px; width: 724px"></div>
     <script>
-    // Variable names due to this originally being the third visualization
         const svg1 = d3.select("#hour");
 
         const width1 = svg1.attr("width");
@@ -93,7 +92,6 @@
                 .domain(hourExtent)
                 .range([10, chartwidth1 - 10]);
 
-            const peopleExtent = d3.extent(data, (d) => d.number_people);
             const peopleScale = d3
                 .scaleLinear()
                 .domain([0, 55])
@@ -101,8 +99,8 @@
 
             const dayScale = d3.scaleOrdinal(d3.schemeTableau10);
 
-            let yAxis3 = d3.axisLeft(peopleScale).ticks(14);
-            let yGridlines2 = d3
+            let yAxis1 = d3.axisLeft(peopleScale).ticks(14);
+            let yGridlines1 = d3
                 .axisLeft(peopleScale)
                 .tickSize(-chartwidth1)
                 .ticks(14)
@@ -111,13 +109,13 @@
             annotations1
                 .append("g")
                 .attr("transform", `translate(${margin1.left},${margin1.top})`)
-                .call(yAxis3);
+                .call(yAxis1);
 
             annotations1
                 .append("g")
                 .attr("class", "gridlines")
                 .attr("transform", `translate(${margin1.left},${margin1.top})`)
-                .call(yGridlines2);
+                .call(yGridlines1);
 
             let xAxis2 = d3
                 .axisBottom(hourScale)
@@ -326,7 +324,6 @@
                 for (let i = 0; i < avgTemps.length; i++) {
                     sortedMonths.push(avgTemps[i][0]);
                 }
-                console.log(avgTemps);
                 return getMonthNames(sortedMonths);
             }
 
@@ -350,7 +347,7 @@
                 .range([chartheight2, 0]);
 
             let yAxis2 = d3.axisLeft(peopleScale).ticks(14);
-            let yGridlines2 = d3
+            let yGridlines1 = d3
                 .axisLeft(peopleScale)
                 .tickSize(-chartwidth2 - 5)
                 .ticks(14)
@@ -364,7 +361,7 @@
                 .append("g")
                 .attr("class", "gridlines")
                 .attr("transform", `translate(${margin2.left - 5},${margin2.top})`)
-                .call(yGridlines2);
+                .call(yGridlines1);
 
             let xAxis2 = d3.axisBottom(monthScale).ticks(12);
 
