@@ -327,7 +327,7 @@
         const peopleExtent = d3.extent(data, (d) => d.number_people);
         const peopleScale = d3
           .scaleLinear()
-          .domain([0, 50])
+          .domain([0, 40])
           .range([chartHeight1, 0]);
 
         let yAxis1 = d3.axisLeft(peopleScale).ticks(14);
