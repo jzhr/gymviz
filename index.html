@@ -243,14 +243,16 @@
       width="800"
       height="320"
       style="margin-top: 10px; margin-bottom: 25px"
-    ></svg>
+    >
+  </svg>
 
     <script>
+
       const svg1 = d3.select("#month");
 
       const width1 = svg1.attr("width");
       const height1 = svg1.attr("height");
-      const margin1 = { left: 60, right: 5, top: 10, bottom: 40 };
+      const margin1 = { left: 60, right: 5, top: 10, bottom: 80 };
 
       const chartWidth1 = width1 - margin1.left - margin1.right;
       const chartHeight1 = height1 - margin1.top - margin1.bottom;
@@ -426,6 +428,47 @@
               .style("stroke", tempScale(temps[m-1]))
               .style("stroke-width", 22);
           }
+
+
+          var definitions = svg1.append("defs");
+          var linearGradient = definitions.append("linearGradient")
+                                  .attr("id", "linear-gradient")
+                                  .attr("x1", "0%")
+                                  .attr("y1", "0%")
+                                  .attr("x2", "100%")
+                                  .attr("y2", "0%");
+
+          linearGradient.append("stop")
+              .attr("offset", "0%")
+              .attr("stop-color", "rgb(84, 106, 250)");
+
+              linearGradient.append("stop")
+                            .attr("offset", "1000%")
+                            .attr("stop-color", "rgb(231, 74, 74)");
+
+          svg1.append("rect")
+                .attr("width", chartWidth1/3)
+                .attr("height", 40)
+                .attr('x', chartWidth1/3 )
+                .attr('y', chartHeight1 + 80)
+                .style("fill", "url(#linear-gradient)");
+
+
+      svg1.append('text')
+          .attr('x', chartWidth1/3)
+          .attr('y', chartHeight1 + 79)
+          .attr('stroke', 'rgb(84, 106, 250')
+          .style("font-size", 13)
+          .text("Colder")
+
+          svg1.append('text')
+              .attr('x', chartWidth1/2 + 80)
+              .attr('y', chartHeight1 + 79)
+              .attr('stroke', 'rgb(231, 74, 74)')
+              .style("font-size", 13)
+              .text("Warmer")
+
+
         });
     </script>
 
