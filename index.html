@@ -34,7 +34,7 @@
   </head>
   <body>
     <h3>Exploration of Campus Gym Crowdedness at Different Times</h3>
-    <p id="Viz_3">Visualization 1:</p>
+    <!-- <p id="Viz_3">Visualization 1:</p> -->
     <svg
       id="hour"
       width="800"
@@ -48,6 +48,7 @@
       style="margin-top: 0; padding: 5px; border: solid black 1px; width: 724px"
     ></div>
     <script>
+
       const svg3 = d3.select("#hour");
 
       const width3 = svg3.attr("width");
@@ -214,7 +215,7 @@
 
     <hr />
 
-    <p id="Viz_1">Visualization 2:</p>
+    <!-- <p id="Viz_1">Visualization 2:</p> -->
     <svg
       id="month"
       width="800"
@@ -374,23 +375,37 @@
           .attr("transform", "rotate(-90)")
           .text("Average Number of People");
 
-        // plot bars
-        for (let m = 1; m <= 12; m++) {
-          chart1
-            .append("line")
-            .attr("x1", monthScale(m))
-            .attr("x2", monthScale(m))
-            .attr("y1", chartHeight1 - 0.5)
-            .attr(
-              "y2",
-              peopleScale(
-                d3.mean(data, (d) => (d.month === m ? d.number_people : NaN))
+          // plot bars
+          let temps = [];
+          for (let m = 1; m <= 12; m++) {
+            temps.push(d3.mean(data, (d) => (d.month === m ? d.temperature : NaN)));
+          }
+          temps.sort((a, b) => a-b);
+
+          console.log(temps);
+
+          const tempScale = d3.scaleLinear().domain([50,65]) //min,max average temperature
+                              .range([d3.color("rgb(84, 106, 250)"), d3.color("rgb(231, 74, 74)")]);
+
+          console.log(tempScale);
+
+          for (let m = 1; m <= 12; m++) {
+              console.log(temps[m-1]);
+            chart1
+              .append("line")
+              .attr("x1", monthScale(m))
+              .attr("x2", monthScale(m))
+              .attr("y1", chartHeight1 - 0.5)
+              .attr(
+                "y2",
+                peopleScale(d3.mean(data, (d) => (d.month === m ? d.number_people : NaN)))
               )
-            )
-            .style("stroke", d3.interpolateTurbo(m / 12))
-            .style("stroke-width", 22);
-        }
-      });
+              // .style("stroke", "blue")
+              .style("stroke", tempScale(temps[m-1]))
+              .style("stroke-width", 22);
+          }
+        });
     </script>
+
   </body>
 </html>
