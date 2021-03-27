@@ -39,7 +39,9 @@
 
         hr {
             margin: 2rem;
-            width: 800px;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            width: 780px;
             background-color: black;
             height: 1px;
         }
@@ -57,30 +59,31 @@
 
 <body>
     <h3>Exploration of Campus Gym Crowdedness at Different Times</h3>
-    <!-- <p id="Viz_3">Visualization 1:</p> -->
+
     <svg id="hour" width="800" height="350" style="margin-top: 10px; margin-bottom: 0px"></svg>
 
     <div id="dayLegend" class="legend" style="margin-top: 0; padding: 5px; border: solid black 1px; width: 724px"></div>
     <script>
-        const svg3 = d3.select("#hour");
+    // Variable names due to this originally being the third visualization
+        const svg1 = d3.select("#hour");
 
-        const width3 = svg3.attr("width");
-        const height3 = svg3.attr("height");
-        const margin3 = {
+        const width1 = svg1.attr("width");
+        const height1 = svg1.attr("height");
+        const margin1 = {
             left: 55,
             right: 5,
             top: 10,
             bottom: 40
         };
 
-        const chartWidth3 = width3 - margin3.left - margin3.right;
-        const chartHeight3 = height3 - margin3.top - margin3.bottom;
+        const chartwidth1 = width1 - margin1.left - margin1.right;
+        const chartheight1 = height1 - margin1.top - margin1.bottom;
 
-        let annotations3 = svg3.append("g").attr("id", "annotations");
+        let annotations1 = svg1.append("g").attr("id", "annotations");
 
-        let chart3 = svg3
+        let chart1 = svg1
             .append("g")
-            .attr("transform", `translate(${margin3.left},${margin3.top})`);
+            .attr("transform", `translate(${margin1.left},${margin1.top})`);
 
         d3.csv("gym.csv", d3.autoType).then((data) => {
             const hourExtent = d3.extent(data, (d) => d.hour);
@@ -88,35 +91,35 @@
             const hourScale = d3
                 .scaleLinear()
                 .domain(hourExtent)
-                .range([10, chartWidth3 - 10]);
+                .range([10, chartwidth1 - 10]);
 
             const peopleExtent = d3.extent(data, (d) => d.number_people);
             const peopleScale = d3
                 .scaleLinear()
                 .domain([0, 55])
-                .range([chartHeight3, 0]);
+                .range([chartheight1, 0]);
 
-            const dayScale = d3.scaleOrdinal(d3.schemeTableau10); //TODO: Change this?
+            const dayScale = d3.scaleOrdinal(d3.schemeTableau10);
 
             let yAxis3 = d3.axisLeft(peopleScale).ticks(14);
-            let yGridlines3 = d3
+            let yGridlines2 = d3
                 .axisLeft(peopleScale)
-                .tickSize(-chartWidth3)
+                .tickSize(-chartwidth1)
                 .ticks(14)
                 .tickFormat("");
 
-            annotations3
+            annotations1
                 .append("g")
-                .attr("transform", `translate(${margin3.left},${margin3.top})`)
+                .attr("transform", `translate(${margin1.left},${margin1.top})`)
                 .call(yAxis3);
 
-            annotations3
+            annotations1
                 .append("g")
                 .attr("class", "gridlines")
-                .attr("transform", `translate(${margin3.left},${margin3.top})`)
-                .call(yGridlines3);
+                .attr("transform", `translate(${margin1.left},${margin1.top})`)
+                .call(yGridlines2);
 
-            let xAxis3 = d3
+            let xAxis2 = d3
                 .axisBottom(hourScale)
                 .ticks(23)
                 .tickFormat((d) => {
@@ -127,38 +130,38 @@
                     }
                 });
 
-            let xGridlines3 = d3
+            let xGridlines1 = d3
                 .axisBottom(hourScale)
-                .tickSize(-chartHeight3 - 5)
+                .tickSize(-chartheight1 - 5)
                 .ticks(23)
                 .tickFormat("");
 
-            annotations3
+            annotations1
                 .append("g")
                 .attr(
                     "transform",
-                    `translate(${margin3.left},${chartHeight3 + margin3.top})`
+                    `translate(${margin1.left},${chartheight1 + margin1.top})`
                 )
-                .call(xAxis3);
+                .call(xAxis2);
 
-            annotations3
+            annotations1
                 .append("g")
                 .attr("class", "gridlines")
                 .attr(
                     "transform",
-                    `translate(${margin3.left},${chartHeight3 + margin3.top})`
+                    `translate(${margin1.left},${chartheight1 + margin1.top})`
                 )
-                .call(xGridlines3);
+                .call(xGridlines1);
 
-            svg3
+            svg1
                 .append("text")
                 .attr("class", "x_label")
                 .attr("text-anchor", "middle")
-                .attr("x", chartWidth3 / 2 + 20)
-                .attr("y", chartHeight3 + 45)
+                .attr("x", chartwidth1 / 2 + 20)
+                .attr("y", chartheight1 + 45)
                 .text("Hour of Day");
 
-            svg3
+            svg1
                 .append("text")
                 .attr("class", "y_label")
                 .attr("text-anchor", "end")
@@ -183,7 +186,7 @@
                     });
 
                     // Append the circles for the chart now, while we have access to all the needed data
-                    chart3
+                    chart1
                         .append("circle")
                         .attr("r", 3)
                         .attr("fill", dayScale(day))
@@ -192,7 +195,6 @@
                 }
                 niceDataArray[day] = niceData;
             }
-            // console.log(niceDataArray);
 
             var lineGen = d3
                 .line()
@@ -202,7 +204,7 @@
 
             for (let day = 0; day < 7; day++) {
                 // 0 = Monday, 6 = Sunday
-                chart3
+                chart1
                     .append("path")
                     .datum(niceDataArray[day])
                     .attr("class", "line")
@@ -232,31 +234,29 @@
     </script>
 
     <hr />
-
-    <!-- <p id="Viz_1">Visualization 2:</p> -->
     <svg id="month" width="800" height="340" style="margin-top: 10px; margin-bottom: 25px">
     </svg>
 
     <script>
-        const svg1 = d3.select("#month");
+        const svg2 = d3.select("#month");
 
-        const width1 = svg1.attr("width");
-        const height1 = svg1.attr("height");
-        const margin1 = {
+        const width2 = svg2.attr("width");
+        const height2 = svg2.attr("height");
+        const margin2 = {
             left: 60,
             right: 5,
             top: 10,
             bottom: 100
         };
 
-        const chartWidth1 = width1 - margin1.left - margin1.right;
-        const chartHeight1 = height1 - margin1.top - margin1.bottom;
+        const chartwidth2 = width2 - margin2.left - margin2.right;
+        const chartheight2 = height2 - margin2.top - margin2.bottom;
 
-        let annotations1 = svg1.append("g").attr("id", "annotations");
+        let annotations2 = svg2.append("g").attr("id", "annotations");
 
-        let chart1 = svg1
+        let chart2 = svg2
             .append("g")
-            .attr("transform", `translate(${margin1.left},${margin1.top})`);
+            .attr("transform", `translate(${margin2.left},${margin2.top})`);
 
         d3.csv("gym.csv", d3.autoType).then((data) => {
             function sortMonthByAvgTemp() {
@@ -333,7 +333,7 @@
             function getMonthRange() {
                 let pos = [];
                 for (let i = 1; i <= 12; i++) {
-                    pos.push(((chartWidth1 - 100) / 12) * i);
+                    pos.push(((chartwidth2 - 100) / 12) * i);
                 }
                 return pos;
             }
@@ -347,44 +347,44 @@
             const peopleScale = d3
                 .scaleLinear()
                 .domain([0, 40])
-                .range([chartHeight1, 0]);
+                .range([chartheight2, 0]);
 
-            let yAxis1 = d3.axisLeft(peopleScale).ticks(14);
-            let yGridlines1 = d3
+            let yAxis2 = d3.axisLeft(peopleScale).ticks(14);
+            let yGridlines2 = d3
                 .axisLeft(peopleScale)
-                .tickSize(-chartWidth1 - 5)
+                .tickSize(-chartwidth2 - 5)
                 .ticks(14)
                 .tickFormat("");
 
-            annotations1
+            annotations2
                 .append("g")
-                .attr("transform", `translate(${margin1.left - 5},${margin1.top})`)
-                .call(yAxis1);
-            annotations1
+                .attr("transform", `translate(${margin2.left - 5},${margin2.top})`)
+                .call(yAxis2);
+            annotations2
                 .append("g")
                 .attr("class", "gridlines")
-                .attr("transform", `translate(${margin1.left - 5},${margin1.top})`)
-                .call(yGridlines1);
+                .attr("transform", `translate(${margin2.left - 5},${margin2.top})`)
+                .call(yGridlines2);
 
-            let xAxis1 = d3.axisBottom(monthScale).ticks(12);
+            let xAxis2 = d3.axisBottom(monthScale).ticks(12);
 
-            annotations1
+            annotations2
                 .append("g")
                 .attr(
                     "transform",
-                    `translate(${margin1.left},${chartHeight1 + margin1.top})`
+                    `translate(${margin2.left},${chartheight2 + margin2.top})`
                 )
-                .call(xAxis1);
+                .call(xAxis2);
 
             // axis labels
-            svg1
+            svg2
                 .append("text")
                 .attr("class", "x_label")
                 .attr("text-anchor", "middle")
-                .attr("x", chartWidth1 / 2 + 20)
-                .attr("y", chartHeight1 + 45)
+                .attr("x", chartwidth2 / 2 + 20)
+                .attr("y", chartheight2 + 45)
                 .text("Months Sorted by Ascending Average Temperature");
-            svg1
+            svg2
                 .append("text")
                 .attr("class", "y_label")
                 .attr("text-anchor", "end")
@@ -405,21 +405,20 @@
                 .range([d3.color("rgb(84, 106, 250)"), d3.color("rgb(231, 74, 74)")]);
 
             for (let m = 1; m <= 12; m++) {
-                chart1
+                chart2
                     .append("line")
                     .attr("x1", monthScale(m))
                     .attr("x2", monthScale(m))
-                    .attr("y1", chartHeight1 - 0.5)
+                    .attr("y1", chartheight2)
                     .attr(
                         "y2",
                         peopleScale(d3.mean(data, (d) => (d.month === m ? d.number_people : NaN)))
                     )
-                    // .style("stroke", "blue")
                     .style("stroke", tempScale(temps[m - 1]))
                     .style("stroke-width", 22);
             }
 
-            var definitions = svg1.append("defs");
+            var definitions = svg2.append("defs");
             var linearGradient = definitions.append("linearGradient")
                 .attr("id", "linear-gradient")
                 .attr("x1", "0%")
@@ -435,45 +434,40 @@
                 .attr("offset", "1000%")
                 .attr("stop-color", "rgb(231, 74, 74)");
 
-            svg1.append("rect")
-                .attr("width", chartWidth1 / 3)
+            svg2.append("rect")
+                .attr("width", chartwidth2 / 3)
                 .attr("height", 10)
-                .attr('x', chartWidth1 / 3)
-                .attr('y', chartHeight1 + 80)
+                .attr('x', chartwidth2 / 3)
+                .attr('y', chartheight2 + 70)
                 .style("fill", "url(#linear-gradient)");
 
-
-            svg1.append('text')
-                .attr('x', chartWidth1 / 3)
-                .attr('y', chartHeight1 + 79)
+            svg2.append('text')
+                .attr('x', chartwidth2 / 3)
+                .attr('y', chartheight2 + 68)
                 .attr('stroke', 'rgb(84, 106, 250')
                 .style("font-size", 13)
                 .text("Colder")
 
-            svg1.append('text')
-                .attr('x', chartWidth1 / 3)
-                .attr('y', chartHeight1 + 101)
+            svg2.append('text')
+                .attr('x', chartwidth2 / 3)
+                .attr('y', chartheight2 + 92)
                 .attr('stroke', 'rgb(84, 106, 250')
                 .style("font-size", 13)
                 .text("50°F")
 
-            svg1.append('text')
-                .attr('x', chartWidth1 / 2 + 76)
-                .attr('y', chartHeight1 + 79)
+            svg2.append('text')
+                .attr('x', chartwidth2 / 2 + 76)
+                .attr('y', chartheight2 + 68)
                 .attr('stroke', 'rgb(231, 74, 74)')
                 .style("font-size", 13)
                 .text("Warmer")
 
-            svg1.append('text')
-                .attr('x', chartWidth1 / 2 + 95)
-                .attr('y', chartHeight1 + 101)
+            svg2.append('text')
+                .attr('x', chartwidth2 / 2 + 95)
+                .attr('y', chartheight2 + 92)
                 .attr('stroke', 'rgb(231, 74, 74)')
                 .style("font-size", 13)
                 .text("65°F")
-
-
-
-
         });
     </script>
 
